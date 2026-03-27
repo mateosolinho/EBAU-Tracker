@@ -369,7 +369,7 @@ function buildExercise(formData) {
     id: crypto.randomUUID(),
     date: String(formData.get("date") || ""),
     subject: String(formData.get("subject") || ""),
-    exerciseType: String(formData.get("exerciseType") || ""),
+    exerciseType: "Ejercicio",
     ebauBlock: String(formData.get("ebauBlock") || ""),
     ebauSubtype: String(formData.get("ebauSubtype") || ""),
     result: String(formData.get("result") || ""),
@@ -1729,7 +1729,6 @@ form.addEventListener("submit", (event) => {
     if (
       !exercise.date ||
       !exercise.subject ||
-      !exercise.exerciseType ||
       !exercise.result ||
       !exercise.minutes ||
       !exercise.recognitionSpeed ||
