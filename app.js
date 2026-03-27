@@ -4,6 +4,7 @@ const TARGETS_STORAGE_KEY = "ebau-tracker-target-scores";
 const MIN_ATTEMPTS_FOR_CONFIDENCE = 3;
 const PDF_DB_NAME = "ebau-tracker-pdf-registry";
 const PDF_STORE_NAME = "pdf-files";
+let pdfRegistryCache = [];
 
 const form = document.getElementById("exercise-form");
 const feedback = document.getElementById("form-feedback");
@@ -13,6 +14,7 @@ const examFeedback = document.getElementById("exam-feedback");
 const examHistoryList = document.getElementById("exam-history-list");
 const examSubjectInput = document.getElementById("examSubject");
 const examWeakBlockInput = document.getElementById("examWeakBlock");
+const examPdfLinkInput = document.getElementById("examPdfLink");
 const examTargetScoreInput = document.getElementById("exam-target-score");
 
 const modeButtons = {
@@ -445,23 +447,25 @@ async function getStoredPdfs() {
 
 async function savePdfRecord(file) {
   if (!file || !file.name.toLowerCase().endsWith(".pdf")) {
-    return false;
+    return null;
   }
+
+  const record = {
+    id: crypto.randomUUID(),
+    name: file.name,
+    type: file.type || "application/pdf",
+    size: file.size,
+    uploadedAt: Date.now(),
+    fileBlob: file,
+  };
 
   const db = await openPdfRegistryDb();
   try {
     const transaction = db.transaction(PDF_STORE_NAME, "readwrite");
     const store = transaction.objectStore(PDF_STORE_NAME);
-    store.put({
-      id: crypto.randomUUID(),
-      name: file.name,
-      type: file.type || "application/pdf",
-      size: file.size,
-      uploadedAt: Date.now(),
-      fileBlob: file,
-    });
+    store.put(record);
     await completeTransaction(transaction);
-    return true;
+    return record;
   } finally {
     db.close();
   }
@@ -491,6 +495,31 @@ function downloadPdfRecord(record) {
   URL.revokeObjectURL(url);
 }
 
+function renderExamPdfOptions(records) {
+  if (!examPdfLinkInput) {
+    return;
+  }
+
+  const previousValue = examPdfLinkInput.value;
+  examPdfLinkInput.innerHTML = "";
+
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "Sin asociar";
+  examPdfLinkInput.appendChild(defaultOption);
+
+  for (const record of records) {
+    const option = document.createElement("option");
+    option.value = record.id;
+    option.textContent = record.name;
+    examPdfLinkInput.appendChild(option);
+  }
+
+  examPdfLinkInput.value = records.some((record) => record.id === previousValue)
+    ? previousValue
+    : "";
+}
+
 async function renderPdfRegistry() {
   if (!pdfRegistryList) {
     return;
@@ -499,6 +528,23 @@ async function renderPdfRegistry() {
 
   try {
     const records = await getStoredPdfs();
+    pdfRegistryCache = records;
+    renderExamPdfOptions(records);
+
+    const exerciseCounts = readExercises().reduce((acc, exercise) => {
+      if (exercise.sourcePdfId) {
+        acc[exercise.sourcePdfId] = (acc[exercise.sourcePdfId] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    const examCounts = readExams().reduce((acc, exam) => {
+      if (exam.examPdfId) {
+        acc[exam.examPdfId] = (acc[exam.examPdfId] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
     if (!records.length) {
       const empty = document.createElement("p");
       empty.className = "pdf-item-meta";
@@ -522,14 +568,22 @@ async function renderPdfRegistry() {
         month: "2-digit",
         year: "numeric",
       });
-      meta.textContent = `${formatBytes(record.size)} • ${dateText}`;
+      const linkedExercises = exerciseCounts[record.id] || 0;
+      const linkedExams = examCounts[record.id] || 0;
+      meta.textContent =
+        `${formatBytes(record.size)} • ${dateText} • ` +
+        `${linkedExercises} ejercicios • ${linkedExams} examenes vinculados`;
 
       const actions = document.createElement("div");
       actions.className = "pdf-item-actions";
       actions.append(
         createItemActionButton("Descargar", "edit", () => downloadPdfRecord(record)),
         createItemActionButton("Borrar", "delete", async () => {
-          const shouldDelete = window.confirm(`¿Borrar PDF ${record.name}?`);
+          const linkedExercises = exerciseCounts[record.id] || 0;
+          const linkedExams = examCounts[record.id] || 0;
+          const shouldDelete = window.confirm(
+            `¿Borrar PDF ${record.name}? Vinculos: ${linkedExercises} ejercicios, ${linkedExams} examenes.`
+          );
           if (!shouldDelete) {
             return;
           }
@@ -677,7 +731,7 @@ async function extractTextFromFile(file) {
   return file.text();
 }
 
-function buildImportedExercisesFromText(examText) {
+function buildImportedExercisesFromText(examText, sourcePdf = null) {
   const subject = pickSubjectByText(examText);
   const today = new Date().toISOString().slice(0, 10);
   const chunks = extractQuestionChunks(examText);
@@ -704,11 +758,16 @@ function buildImportedExercisesFromText(examText) {
       createdAt: Date.now(),
       importedFromExam: true,
       sourceQuestion: chunk.label,
+      sourcePdfId: sourcePdf?.id || "",
+      sourcePdfName: sourcePdf?.name || "",
     };
   });
 }
 
 function buildExamAttempt(formData) {
+  const linkedPdfId = String(formData.get("examPdfLink") || "");
+  const linkedPdfRecord = pdfRegistryCache.find((record) => record.id === linkedPdfId);
+
   return {
     id: crypto.randomUUID(),
     date: String(formData.get("examDate") || ""),
@@ -717,6 +776,8 @@ function buildExamAttempt(formData) {
     score: Number(formData.get("examScore") || 0),
     minutes: Number(formData.get("examMinutes") || 0),
     weakBlock: String(formData.get("examWeakBlock") || "").trim(),
+    examPdfId: linkedPdfRecord?.id || "",
+    examPdfName: linkedPdfRecord?.name || "",
     mainError: String(formData.get("examMainError") || ""),
     actionPlan: String(formData.get("examActionPlan") || "").trim(),
     createdAt: Date.now(),
@@ -1383,6 +1444,7 @@ function renderHistory(exercises) {
     );
     appendStrongParagraph(item, "Confianza", ex.confidenceLevel || "-");
     appendStrongParagraph(item, "Tipo exacto EBAU", ex.exactEbauType || "-");
+    appendStrongParagraph(item, "PDF origen", ex.sourcePdfName || "-");
     appendStrongParagraph(item, "Origen", ex.importedFromExam ? "Importado de examen" : "Manual");
     appendStrongParagraph(item, "Regla", ex.learnedRule || "-");
 
@@ -1484,6 +1546,7 @@ function renderExamHistory(exams) {
 
     item.append(topRow, meta);
     appendStrongParagraph(item, "Bloque flojo", exam.weakBlock || "-");
+    appendStrongParagraph(item, "PDF asociado", exam.examPdfName || "-");
     appendStrongParagraph(item, "Error dominante", exam.mainError);
     appendStrongParagraph(item, "Plan accion", exam.actionPlan || "-");
 
@@ -1637,6 +1700,8 @@ function buildSubjectExerciseSnapshot(subject, exercises) {
       exactEbauType: exercise.exactEbauType || "",
       importedFromExam: Boolean(exercise.importedFromExam),
       sourceQuestion: exercise.sourceQuestion || "",
+      sourcePdfId: exercise.sourcePdfId || "",
+      sourcePdfName: exercise.sourcePdfName || "",
       learnedRule: exercise.learnedRule || "",
     }));
 
@@ -1672,17 +1737,17 @@ async function importExamFileAsExercises() {
     feedback.textContent = "Leyendo examen y detectando ejercicios...";
 
     const extractedText = await extractTextFromFile(file);
-    const importedExercises = buildImportedExercisesFromText(extractedText).filter(
+    const previewExercises = buildImportedExercisesFromText(extractedText).filter(
       (exercise) => exercise.ebauBlock && exercise.ebauSubtype
     );
 
-    if (!importedExercises.length) {
+    if (!previewExercises.length) {
       feedback.textContent = "No pude detectar ejercicios utiles. Prueba con otro PDF/TXT.";
       return;
     }
 
     const shouldImport = window.confirm(
-      `Se detectaron ${importedExercises.length} ejercicios de ${importedExercises[0].subject}. ¿Quieres anadirlos?`
+      `Se detectaron ${previewExercises.length} ejercicios de ${previewExercises[0].subject}. ¿Quieres anadirlos?`
     );
 
     if (!shouldImport) {
@@ -1690,16 +1755,19 @@ async function importExamFileAsExercises() {
       return;
     }
 
+    const savedPdfRecord = await savePdfRecord(file);
+    const importedExercises = buildImportedExercisesFromText(extractedText, savedPdfRecord).filter(
+      (exercise) => exercise.ebauBlock && exercise.ebauSubtype
+    );
+
     const exercises = readExercises();
     exercises.push(...importedExercises);
     writeExercises(exercises);
 
-    const wasPdfSaved = await savePdfRecord(file);
-
     feedback.textContent =
       `Importados ${importedExercises.length} ejercicios como pendientes. ` +
       "No afectan metricas hasta que registres resultado real.";
-    pdfRegistryFeedback.textContent = wasPdfSaved
+    pdfRegistryFeedback.textContent = savedPdfRecord
       ? "PDF guardado en el registro local."
       : "Archivo importado (solo se registran PDFs).";
     examImportFileInput.value = "";
@@ -1743,6 +1811,8 @@ function buildSubjectExamSnapshot(subject, exams) {
       date: exam.date,
       score: Number(exam.score.toFixed(2)),
       weakBlock: exam.weakBlock || "",
+      examPdfId: exam.examPdfId || "",
+      examPdfName: exam.examPdfName || "",
       dominantError: exam.mainError,
       actionPlan: exam.actionPlan || "",
     })),
