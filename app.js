@@ -24,14 +24,6 @@ const subjectViewButtons = {
     Mate: document.getElementById("global-subject-mate"),
     Fisica: document.getElementById("global-subject-fisica"),
   },
-  practice: {
-    Mate: document.getElementById("practice-view-mate"),
-    Fisica: document.getElementById("practice-view-fisica"),
-  },
-  history: {
-    Mate: document.getElementById("history-view-mate"),
-    Fisica: document.getElementById("history-view-fisica"),
-  },
   exam: {
     Mate: document.getElementById("exam-view-mate"),
     Fisica: document.getElementById("exam-view-fisica"),
@@ -1343,8 +1335,6 @@ function setSubjectView(mode, subject) {
 
   const groups = [
     subjectViewButtons.global,
-    subjectViewButtons.practice,
-    subjectViewButtons.history,
     subjectViewButtons.exam,
   ];
 
@@ -1833,10 +1823,6 @@ modeButtons.practice.addEventListener("click", () => setMode("practice"));
 modeButtons.exam.addEventListener("click", () => setMode("exam"));
 subjectViewButtons.global.Mate.addEventListener("click", () => setSubjectView("practice", "Mate"));
 subjectViewButtons.global.Fisica.addEventListener("click", () => setSubjectView("practice", "Fisica"));
-subjectViewButtons.practice.Mate.addEventListener("click", () => setSubjectView("practice", "Mate"));
-subjectViewButtons.practice.Fisica.addEventListener("click", () => setSubjectView("practice", "Fisica"));
-subjectViewButtons.history.Mate.addEventListener("click", () => setSubjectView("practice", "Mate"));
-subjectViewButtons.history.Fisica.addEventListener("click", () => setSubjectView("practice", "Fisica"));
 subjectViewButtons.exam.Mate.addEventListener("click", () => setSubjectView("exam", "Mate"));
 subjectViewButtons.exam.Fisica.addEventListener("click", () => setSubjectView("exam", "Fisica"));
 examTargetScoreInput.addEventListener("change", () => {

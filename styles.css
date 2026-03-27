@@ -122,6 +122,12 @@ p {
   font-size: 0.95rem;
 }
 
+.hero-controls {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
 @media (max-width: 768px) {
   .hero {
     padding: 18px;
@@ -717,13 +723,23 @@ select:focus {
 }
 
 .global-subject-switch {
-  margin-top: 10px;
+  margin-top: 0;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
 }
 
 .global-subject-switch .subject-btn {
-  min-height: 34px;
+  min-height: 32px;
   padding: 6px 12px;
   font-size: 0.82rem;
+}
+
+.global-subject-switch .subject-btn.active {
+  background: #f4f8fb;
+  color: #102133;
+  border-color: #f4f8fb;
 }
 
 .subject-switch.compact .subject-btn {
@@ -794,6 +810,10 @@ select:focus {
 
   .history-toolbar {
     align-items: stretch;
+  }
+
+  .hero-controls {
+    gap: 8px;
   }
 }
 

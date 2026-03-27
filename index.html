@@ -23,21 +23,23 @@
         <p>
           Registra ejercicios, detecta patrones de error y mejora nota mas rapido.
         </p>
-        <div class="mode-switch" role="tablist" aria-label="Seleccion de modo">
-          <button id="mode-practice" class="mode-btn active" type="button" role="tab" aria-selected="true">
-            Modo ejercicios
-          </button>
-          <button id="mode-exam" class="mode-btn" type="button" role="tab" aria-selected="false">
-            Modo examenes completos
-          </button>
-        </div>
-        <div class="subject-switch compact global-subject-switch" role="tablist" aria-label="Asignatura global">
-          <button id="global-subject-mate" class="subject-btn active" type="button" role="tab" aria-selected="true">
-            Mate (global)
-          </button>
-          <button id="global-subject-fisica" class="subject-btn" type="button" role="tab" aria-selected="false">
-            Fisica (global)
-          </button>
+        <div class="hero-controls">
+          <div class="mode-switch" role="tablist" aria-label="Seleccion de modo">
+            <button id="mode-practice" class="mode-btn active" type="button" role="tab" aria-selected="true">
+              Modo ejercicios
+            </button>
+            <button id="mode-exam" class="mode-btn" type="button" role="tab" aria-selected="false">
+              Modo examenes completos
+            </button>
+          </div>
+          <div class="subject-switch compact global-subject-switch" role="tablist" aria-label="Asignatura global">
+            <button id="global-subject-mate" class="subject-btn active" type="button" role="tab" aria-selected="true">
+              Mate
+            </button>
+            <button id="global-subject-fisica" class="subject-btn" type="button" role="tab" aria-selected="false">
+              Fisica
+            </button>
+          </div>
         </div>
       </header>
 
@@ -190,26 +192,6 @@
         </button>
 
         <div id="dashboard-content" class="section-content" hidden>
-          <div class="subject-switch" role="tablist" aria-label="Vista de asignatura ejercicios">
-            <button
-              id="practice-view-mate"
-              class="subject-btn active"
-              type="button"
-              role="tab"
-              aria-selected="true"
-            >
-              Mate
-            </button>
-            <button
-              id="practice-view-fisica"
-              class="subject-btn"
-              type="button"
-              role="tab"
-              aria-selected="false"
-            >
-              Fisica
-            </button>
-          </div>
 
           <div class="stats-grid" id="stats-grid">
             <article class="stat-box">
@@ -297,15 +279,6 @@
         </div>
 
         <div class="history-toolbar">
-          <div class="subject-switch compact" role="tablist" aria-label="Vista de asignatura historial">
-            <button id="history-view-mate" class="subject-btn active" type="button" role="tab" aria-selected="true">
-              Mate
-            </button>
-            <button id="history-view-fisica" class="subject-btn" type="button" role="tab" aria-selected="false">
-              Fisica
-            </button>
-          </div>
-
           <div class="history-actions compact">
             <button id="export-json-current" class="ghost-btn" type="button">Exportar asignatura actual</button>
           </div>
