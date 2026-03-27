@@ -309,6 +309,7 @@ function asRiskLabel(score) {
 
 function buildExercise(formData) {
   const learnedRule = String(formData.get("learnedRule") || "").trim();
+  const exactEbauType = String(formData.get("exactEbauType") || "").trim();
 
   return {
     id: crypto.randomUUID(),
@@ -319,7 +320,12 @@ function buildExercise(formData) {
     ebauSubtype: String(formData.get("ebauSubtype") || ""),
     result: String(formData.get("result") || ""),
     minutes: Number(formData.get("minutes") || 0),
+    recognitionSpeed: String(formData.get("recognitionSpeed") || ""),
+    confidenceLevel: String(formData.get("confidenceLevel") || ""),
     mainError: String(formData.get("mainError") || ""),
+    errorPhase: String(formData.get("errorPhase") || ""),
+    exactEbauType,
+    repeatedError: formData.get("repeatedError") === "on",
     learnedRule,
     createdAt: Date.now(),
   };
@@ -390,6 +396,7 @@ function calculateDashboard(exercises, activeSubject) {
   const byBlock = new Map();
   const byError = new Map();
   const byRule = new Map();
+  const byErrorPhase = new Map();
   const bySubjectBlock = new Map(
     Object.entries(SUBJECT_STRUCTURES).map(([subjectKey, subjectConfig]) => [
       subjectKey,
@@ -429,6 +436,10 @@ function calculateDashboard(exercises, activeSubject) {
 
     if (ex.learnedRule) {
       byRule.set(ex.learnedRule, (byRule.get(ex.learnedRule) || 0) + 1);
+    }
+
+    if (ex.errorPhase) {
+      byErrorPhase.set(ex.errorPhase, (byErrorPhase.get(ex.errorPhase) || 0) + 1);
     }
 
     const subjectMap = bySubjectBlock.get(ex.subject);
@@ -473,6 +484,11 @@ function calculateDashboard(exercises, activeSubject) {
 
   const rulesToReview = [...byRule.entries()]
     .map(([rule, count]) => ({ rule, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
+
+  const topErrorPhases = [...byErrorPhase.entries()]
+    .map(([phase, count]) => ({ phase, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 3);
 
@@ -557,6 +573,7 @@ function calculateDashboard(exercises, activeSubject) {
     topErrors,
     weakBlocks,
     rulesToReview,
+    topErrorPhases,
     candidatePriority,
     priorityByPractice,
     priorityConfidence,
@@ -837,6 +854,11 @@ function renderHistory(exercises) {
 
     item.append(meta, title);
     appendStrongParagraph(item, "Error", ex.mainError);
+    appendStrongParagraph(item, "Fase", ex.errorPhase || "-");
+    appendStrongParagraph(item, "Reconocimiento <5s", ex.recognitionSpeed === "yes" ? "Si" : "No");
+    appendStrongParagraph(item, "Confianza", ex.confidenceLevel || "-");
+    appendStrongParagraph(item, "Tipo exacto EBAU", ex.exactEbauType || "-");
+    appendStrongParagraph(item, "Error repetido", ex.repeatedError ? "Si" : "No");
     appendStrongParagraph(item, "Regla", ex.learnedRule || "-");
 
     historyList.appendChild(item);
@@ -984,6 +1006,11 @@ function buildSubjectExerciseSnapshot(subject, exercises) {
 
   const blockMap = new Map();
   const errorMap = new Map();
+  const confidenceMap = new Map();
+  const phaseMap = new Map();
+  let repeatedErrorCount = 0;
+  let recognitionMissCount = 0;
+  let falsePositiveCount = 0;
 
   for (const exercise of subjectExercises) {
     const blockName = exercise.ebauBlock || "Sin bloque oficial";
@@ -995,6 +1022,29 @@ function buildSubjectExerciseSnapshot(subject, exercises) {
     blockStats[exercise.result] += 1;
 
     errorMap.set(exercise.mainError, (errorMap.get(exercise.mainError) || 0) + 1);
+
+    if (exercise.confidenceLevel) {
+      confidenceMap.set(
+        exercise.confidenceLevel,
+        (confidenceMap.get(exercise.confidenceLevel) || 0) + 1
+      );
+    }
+
+    if (exercise.errorPhase) {
+      phaseMap.set(exercise.errorPhase, (phaseMap.get(exercise.errorPhase) || 0) + 1);
+    }
+
+    if (exercise.repeatedError) {
+      repeatedErrorCount += 1;
+    }
+
+    if (exercise.recognitionSpeed === "no") {
+      recognitionMissCount += 1;
+    }
+
+    if (exercise.result === "ok" && exercise.confidenceLevel !== "seguro") {
+      falsePositiveCount += 1;
+    }
   }
 
   const blockPerformance = [...blockMap.entries()]
@@ -1012,6 +1062,14 @@ function buildSubjectExerciseSnapshot(subject, exercises) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
+  const confidenceDistribution = [...confidenceMap.entries()]
+    .map(([level, count]) => ({ level, count }))
+    .sort((a, b) => b.count - a.count);
+
+  const phaseDistribution = [...phaseMap.entries()]
+    .map(([phase, count]) => ({ phase, count }))
+    .sort((a, b) => b.count - a.count);
+
   const recent = [...subjectExercises]
     .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt)
     .slice(0, 10)
@@ -1022,6 +1080,11 @@ function buildSubjectExerciseSnapshot(subject, exercises) {
       result: exercise.result,
       minutes: exercise.minutes,
       mainError: exercise.mainError,
+      errorPhase: exercise.errorPhase || "",
+      confidenceLevel: exercise.confidenceLevel || "",
+      recognitionSpeed: exercise.recognitionSpeed || "",
+      exactEbauType: exercise.exactEbauType || "",
+      repeatedError: Boolean(exercise.repeatedError),
       learnedRule: exercise.learnedRule || "",
     }));
 
@@ -1035,6 +1098,11 @@ function buildSubjectExerciseSnapshot(subject, exercises) {
     avgMinutes,
     weakBlocks: blockPerformance.filter((block) => block.total >= 2).slice(0, 5),
     topErrors,
+    confidenceDistribution,
+    phaseDistribution,
+    repeatedErrorRate: total ? Number((repeatedErrorCount / total).toFixed(3)) : 0,
+    recognitionMissRate: total ? Number((recognitionMissCount / total).toFixed(3)) : 0,
+    falsePositiveRate: okCount ? Number((falsePositiveCount / okCount).toFixed(3)) : 0,
     blockPerformance,
     recentAttempts: recent,
   };
@@ -1219,7 +1287,16 @@ form.addEventListener("submit", (event) => {
       return;
     }
 
-    if (!exercise.date || !exercise.subject || !exercise.exerciseType || !exercise.result || !exercise.minutes) {
+    if (
+      !exercise.date ||
+      !exercise.subject ||
+      !exercise.exerciseType ||
+      !exercise.result ||
+      !exercise.minutes ||
+      !exercise.recognitionSpeed ||
+      !exercise.confidenceLevel ||
+      !exercise.errorPhase
+    ) {
       feedback.textContent = "Completa todos los campos obligatorios antes de guardar.";
       return;
     }

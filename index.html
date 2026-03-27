@@ -95,6 +95,25 @@
             <input type="number" id="minutes" name="minutes" min="1" max="300" required />
           </label>
 
+          <label>
+            ¿Identifique el tipo en &lt;5s?
+            <select id="recognitionSpeed" name="recognitionSpeed" required>
+              <option value="">Selecciona</option>
+              <option value="yes">Si</option>
+              <option value="no">No</option>
+            </select>
+          </label>
+
+          <label>
+            Confianza
+            <select id="confidenceLevel" name="confidenceLevel" required>
+              <option value="">Selecciona</option>
+              <option value="seguro">Seguro</option>
+              <option value="duda">Duda</option>
+              <option value="suerte">Suerte</option>
+            </select>
+          </label>
+
           <label class="full-width">
             Error principal
             <select id="mainError" name="mainError" required>
@@ -105,6 +124,33 @@
               <option>Error de planteamiento</option>
               <option>Descuidado</option>
             </select>
+          </label>
+
+          <label>
+            Fase del error
+            <select id="errorPhase" name="errorPhase" required>
+              <option value="">Selecciona</option>
+              <option value="Reconocimiento">Reconocimiento</option>
+              <option value="Planteamiento">Planteamiento</option>
+              <option value="Calculo">Calculo</option>
+              <option value="Revision">Revision</option>
+            </select>
+          </label>
+
+          <label>
+            Tipo exacto EBAU
+            <input
+              type="text"
+              id="exactEbauType"
+              name="exactEbauType"
+              maxlength="80"
+              placeholder="Ej: maximos y minimos"
+            />
+          </label>
+
+          <label class="checkbox-wrap full-width">
+            <input id="repeatedError" name="repeatedError" type="checkbox" />
+            Ya habias fallado algo similar antes
           </label>
 
           <label class="full-width">
