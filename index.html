@@ -268,21 +268,29 @@
           <span class="pill">Filtro rapido</span>
         </div>
 
-        <div class="subject-switch" role="tablist" aria-label="Vista de asignatura historial">
-          <button id="history-view-mate" class="subject-btn active" type="button" role="tab" aria-selected="true">
-            Mate
-          </button>
-          <button id="history-view-fisica" class="subject-btn" type="button" role="tab" aria-selected="false">
-            Fisica
-          </button>
+        <div class="history-toolbar">
+          <div class="subject-switch compact" role="tablist" aria-label="Vista de asignatura historial">
+            <button id="history-view-mate" class="subject-btn active" type="button" role="tab" aria-selected="true">
+              Mate
+            </button>
+            <button id="history-view-fisica" class="subject-btn" type="button" role="tab" aria-selected="false">
+              Fisica
+            </button>
+          </div>
+
+          <div class="history-actions compact">
+            <button id="export-json-current" class="ghost-btn" type="button">Exportar asignatura actual</button>
+            <button id="clear-data" class="ghost-btn danger" type="button">Borrar</button>
+          </div>
         </div>
 
-        <div class="history-actions">
-          <button id="export-json-current" class="ghost-btn" type="button">Exportar asignatura actual (full)</button>
-          <input id="exam-import-file" class="ghost-input" type="file" accept=".pdf,.txt" />
-          <button id="import-exam-btn" class="ghost-btn" type="button">Importar examen a ejercicios</button>
-          <button id="clear-data" class="ghost-btn danger" type="button">Borrar datos</button>
-        </div>
+        <details class="import-panel">
+          <summary>Importacion de examen</summary>
+          <div class="history-actions import-actions">
+            <input id="exam-import-file" class="ghost-input" type="file" accept=".pdf,.txt" />
+            <button id="import-exam-btn" class="ghost-btn" type="button">Importar examen a ejercicios</button>
+          </div>
+        </details>
 
         <form id="filters" class="filters">
           <label>

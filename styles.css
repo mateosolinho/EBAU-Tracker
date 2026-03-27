@@ -677,6 +677,57 @@ select:focus {
   flex-wrap: wrap;
 }
 
+.history-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.subject-switch.compact {
+  margin: 0;
+  gap: 6px;
+}
+
+.subject-switch.compact .subject-btn {
+  min-height: 34px;
+  padding: 5px 10px;
+  font-size: 0.82rem;
+}
+
+.history-actions.compact {
+  margin: 0;
+  gap: 6px;
+}
+
+.history-actions.compact .ghost-btn {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+}
+
+.import-panel {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #0f1825;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+
+.import-panel summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.85rem;
+  user-select: none;
+}
+
+.import-actions {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
 @media (max-width: 768px) {
   .history-actions {
     gap: 10px;
@@ -685,6 +736,10 @@ select:focus {
   
   .history-actions .ghost-btn {
     flex: 1;
+  }
+
+  .history-toolbar {
+    align-items: stretch;
   }
 }
 
@@ -697,6 +752,20 @@ select:focus {
   .history-actions .ghost-btn {
     width: 100%;
     flex: unset;
+  }
+
+  .subject-switch.compact {
+    width: 100%;
+  }
+
+  .history-actions.compact {
+    width: 100%;
+    flex-direction: row;
+  }
+
+  .history-actions.compact .ghost-btn {
+    width: auto;
+    flex: 1;
   }
 }
 
