@@ -64,6 +64,8 @@ const exportJsonFisicaButton = document.getElementById("export-json-fisica");
 const exportExamsJsonMateButton = document.getElementById("export-exams-json-mate");
 const exportExamsJsonFisicaButton = document.getElementById("export-exams-json-fisica");
 const clearDataButton = document.getElementById("clear-data");
+const importExamButton = document.getElementById("import-exam-btn");
+const examImportFileInput = document.getElementById("exam-import-file");
 const coachToggle = document.getElementById("coach-toggle");
 const coachContent = document.getElementById("coach-content");
 const subjectInput = document.getElementById("subject");
@@ -81,6 +83,59 @@ const resultLabel = {
   ok: "✔ Acierto",
   fail: "❌ Fallo",
   warn: "⚠️ Duda parcial",
+  pending: "⏳ Pendiente",
+};
+
+const SUBJECT_KEYWORDS = {
+  Mate: [
+    "derivada",
+    "tangente",
+    "concavidad",
+    "maximo",
+    "minimo",
+    "integral",
+    "gauss",
+    "determinante",
+    "matriz",
+    "probabilidad",
+    "bayes",
+    "recta",
+    "plano",
+  ],
+  Fisica: [
+    "newton",
+    "fuerza",
+    "dinamica",
+    "cinematica",
+    "mrua",
+    "velocidad",
+    "aceleracion",
+    "trabajo",
+    "energia",
+    "onda",
+    "electrico",
+    "ohm",
+    "circuito",
+    "gravitatorio",
+  ],
+};
+
+const BLOCK_KEYWORDS = {
+  Mate: {
+    Analisis: ["derivada", "tangente", "concavidad", "maximo", "minimo", "funcion", "limite"],
+    "Algebra lineal": ["gauss", "determinante", "matriz", "sistema", "inversa", "rango"],
+    Geometria: ["recta", "plano", "distancia", "angulo", "vector"],
+    Probabilidad: ["probabilidad", "bayes", "suceso", "condicionada"],
+    Integrales: ["integral", "primitiva", "area"],
+  },
+  Fisica: {
+    Cinematica: ["mru", "mrua", "velocidad", "aceleracion", "trayectoria", "tiempo"],
+    Dinamica: ["newton", "fuerza", "rozamiento", "plano inclinado", "masa"],
+    "Trabajo y energia": ["trabajo", "energia", "potencial", "cinetica", "conservacion"],
+    "Campo gravitatorio / electrico": ["campo", "potencial", "gravitatorio", "electrico", "coulomb"],
+    Ondas: ["onda", "frecuencia", "longitud de onda", "amplitud"],
+    Electricidad: ["ohm", "resistencia", "intensidad", "voltaje", "circuito"],
+  },
 };
 
 const SUBJECT_STRUCTURES = {
@@ -325,10 +380,167 @@ function buildExercise(formData) {
     mainError: String(formData.get("mainError") || ""),
     errorPhase: String(formData.get("errorPhase") || ""),
     exactEbauType,
-    repeatedError: formData.get("repeatedError") === "on",
     learnedRule,
     createdAt: Date.now(),
   };
+}
+
+function normalizeText(text) {
+  return String(text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function pickSubjectByText(text) {
+  const normalized = normalizeText(text);
+  let bestSubject = "Mate";
+  let bestScore = -1;
+
+  for (const [subject, keywords] of Object.entries(SUBJECT_KEYWORDS)) {
+    const score = keywords.reduce(
+      (acc, keyword) => acc + (normalized.includes(normalizeText(keyword)) ? 1 : 0),
+      0
+    );
+    if (score > bestScore) {
+      bestScore = score;
+      bestSubject = subject;
+    }
+  }
+
+  return bestSubject;
+}
+
+function pickBlockAndSubtype(questionText, subject) {
+  const normalized = normalizeText(questionText);
+  const subjectBlocks = BLOCK_KEYWORDS[subject] || {};
+  let bestBlock = Object.keys(SUBJECT_STRUCTURES[subject]?.blocks || {})[0] || "";
+  let bestScore = -1;
+
+  for (const [block, keywords] of Object.entries(subjectBlocks)) {
+    const score = keywords.reduce(
+      (acc, keyword) => acc + (normalized.includes(normalizeText(keyword)) ? 1 : 0),
+      0
+    );
+    if (score > bestScore) {
+      bestScore = score;
+      bestBlock = block;
+    }
+  }
+
+  const subtypes = SUBJECT_STRUCTURES[subject]?.blocks?.[bestBlock]?.subtypes || [];
+  let bestSubtype = subtypes[0] || "";
+  let subtypeScore = -1;
+  for (const subtype of subtypes) {
+    const cleanSubtype = normalizeText(subtype);
+    let score = 0;
+    for (const token of cleanSubtype.split(/[^a-z0-9]+/).filter((token) => token.length > 3)) {
+      if (normalized.includes(token)) {
+        score += 1;
+      }
+    }
+    if (score > subtypeScore) {
+      subtypeScore = score;
+      bestSubtype = subtype;
+    }
+  }
+
+  return { block: bestBlock, subtype: bestSubtype };
+}
+
+function extractQuestionChunks(examText) {
+  const cleanText = String(examText || "").replace(/\r/g, "");
+  const markers = [];
+  const regex = /(?:^|\n)\s*(?:ejercicio\s*)?(\d{1,2}|[ivxlcdm]+)[\)\.:\-]\s+/gim;
+  let match;
+
+  while ((match = regex.exec(cleanText)) !== null) {
+    markers.push({ index: match.index, label: String(match[1]).trim() });
+  }
+
+  if (markers.length < 2) {
+    const fallback = cleanText
+      .split(/\n\n+/)
+      .map((chunk) => chunk.trim())
+      .filter((chunk) => chunk.length > 50)
+      .slice(0, 12)
+      .map((chunk, index) => ({ label: String(index + 1), prompt: chunk }));
+    return fallback;
+  }
+
+  const chunks = [];
+  for (let i = 0; i < markers.length; i += 1) {
+    const start = markers[i].index;
+    const end = markers[i + 1] ? markers[i + 1].index : cleanText.length;
+    const prompt = cleanText.slice(start, end).trim();
+    if (prompt.length > 15) {
+      chunks.push({ label: markers[i].label, prompt });
+    }
+  }
+  return chunks.slice(0, 16);
+}
+
+async function extractTextFromPdf(file) {
+  if (!window.pdfjsLib) {
+    throw new Error("pdf.js no esta disponible ahora mismo");
+  }
+
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+
+  const buffer = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+  const pages = [];
+
+  for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+    const page = await pdf.getPage(pageNumber);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items.map((item) => item.str).join(" ");
+    pages.push(pageText);
+  }
+
+  return pages.join("\n");
+}
+
+async function extractTextFromFile(file) {
+  const extension = (file.name.split(".").pop() || "").toLowerCase();
+
+  if (extension === "pdf") {
+    return extractTextFromPdf(file);
+  }
+
+  return file.text();
+}
+
+function buildImportedExercisesFromText(examText) {
+  const subject = pickSubjectByText(examText);
+  const today = new Date().toISOString().slice(0, 10);
+  const chunks = extractQuestionChunks(examText);
+
+  return chunks.map((chunk) => {
+    const guess = pickBlockAndSubtype(chunk.prompt, subject);
+    const shortPrompt = chunk.prompt.replace(/\s+/g, " ").slice(0, 90);
+
+    return {
+      id: crypto.randomUUID(),
+      date: today,
+      subject,
+      exerciseType: "Problema largo",
+      ebauBlock: guess.block,
+      ebauSubtype: guess.subtype,
+      result: "pending",
+      minutes: 0,
+      recognitionSpeed: "",
+      confidenceLevel: "",
+      mainError: "Pendiente de resolver",
+      errorPhase: "",
+      exactEbauType: shortPrompt,
+      learnedRule: "",
+      createdAt: Date.now(),
+      importedFromExam: true,
+      sourceQuestion: chunk.label,
+    };
+  });
 }
 
 function buildExamAttempt(formData) {
@@ -387,10 +599,11 @@ function calculateStreak(exercises) {
 }
 
 function calculateDashboard(exercises, activeSubject) {
-  const total = exercises.length;
-  const okCount = exercises.filter((e) => e.result === "ok").length;
+  const scoredExercises = exercises.filter((exercise) => ["ok", "fail", "warn"].includes(exercise.result));
+  const total = scoredExercises.length;
+  const okCount = scoredExercises.filter((e) => e.result === "ok").length;
   const avgTime = total
-    ? Math.round(exercises.reduce((sum, e) => sum + e.minutes, 0) / total)
+    ? Math.round(scoredExercises.reduce((sum, e) => sum + e.minutes, 0) / total)
     : 0;
 
   const byBlock = new Map();
@@ -419,7 +632,7 @@ function calculateDashboard(exercises, activeSubject) {
   const last7 = [];
   const last14 = [];
 
-  for (const ex of exercises) {
+  for (const ex of scoredExercises) {
     const blockKey = ex.ebauBlock || "Sin bloque oficial";
     if (!byBlock.has(blockKey)) {
       byBlock.set(blockKey, { ok: 0, total: 0, failOrWarn: 0 });
@@ -567,7 +780,7 @@ function calculateDashboard(exercises, activeSubject) {
     totalAccuracy: total ? okCount / total : 0,
     avgTime,
     accuracy7d,
-    streak: calculateStreak(exercises),
+    streak: calculateStreak(scoredExercises),
     riskScore,
     blockRows,
     topErrors,
@@ -821,7 +1034,7 @@ function renderHistory(exercises) {
 
   for (const ex of filtered) {
     const item = document.createElement("article");
-    item.className = `history-item ${ex.result}`;
+    item.className = `history-item ${ex.result || "pending"}`;
 
     const meta = document.createElement("div");
     meta.className = "history-meta";
@@ -855,10 +1068,14 @@ function renderHistory(exercises) {
     item.append(meta, title);
     appendStrongParagraph(item, "Error", ex.mainError);
     appendStrongParagraph(item, "Fase", ex.errorPhase || "-");
-    appendStrongParagraph(item, "Reconocimiento <5s", ex.recognitionSpeed === "yes" ? "Si" : "No");
+    appendStrongParagraph(
+      item,
+      "Reconocimiento <5s",
+      ex.recognitionSpeed ? (ex.recognitionSpeed === "yes" ? "Si" : "No") : "-"
+    );
     appendStrongParagraph(item, "Confianza", ex.confidenceLevel || "-");
     appendStrongParagraph(item, "Tipo exacto EBAU", ex.exactEbauType || "-");
-    appendStrongParagraph(item, "Error repetido", ex.repeatedError ? "Si" : "No");
+    appendStrongParagraph(item, "Origen", ex.importedFromExam ? "Importado de examen" : "Manual");
     appendStrongParagraph(item, "Regla", ex.learnedRule || "-");
 
     historyList.appendChild(item);
@@ -996,23 +1213,25 @@ function setMode(modeName) {
 
 function buildSubjectExerciseSnapshot(subject, exercises) {
   const subjectExercises = exercises.filter((exercise) => exercise.subject === subject);
-  const total = subjectExercises.length;
-  const okCount = subjectExercises.filter((exercise) => exercise.result === "ok").length;
-  const warnCount = subjectExercises.filter((exercise) => exercise.result === "warn").length;
-  const failCount = subjectExercises.filter((exercise) => exercise.result === "fail").length;
+  const scoredExercises = subjectExercises.filter((exercise) =>
+    ["ok", "fail", "warn"].includes(exercise.result)
+  );
+  const total = scoredExercises.length;
+  const okCount = scoredExercises.filter((exercise) => exercise.result === "ok").length;
+  const warnCount = scoredExercises.filter((exercise) => exercise.result === "warn").length;
+  const failCount = scoredExercises.filter((exercise) => exercise.result === "fail").length;
   const avgMinutes = total
-    ? Math.round(subjectExercises.reduce((sum, exercise) => sum + exercise.minutes, 0) / total)
+    ? Math.round(scoredExercises.reduce((sum, exercise) => sum + exercise.minutes, 0) / total)
     : 0;
 
   const blockMap = new Map();
   const errorMap = new Map();
   const confidenceMap = new Map();
   const phaseMap = new Map();
-  let repeatedErrorCount = 0;
   let recognitionMissCount = 0;
   let falsePositiveCount = 0;
 
-  for (const exercise of subjectExercises) {
+  for (const exercise of scoredExercises) {
     const blockName = exercise.ebauBlock || "Sin bloque oficial";
     if (!blockMap.has(blockName)) {
       blockMap.set(blockName, { total: 0, ok: 0, warn: 0, fail: 0 });
@@ -1032,10 +1251,6 @@ function buildSubjectExerciseSnapshot(subject, exercises) {
 
     if (exercise.errorPhase) {
       phaseMap.set(exercise.errorPhase, (phaseMap.get(exercise.errorPhase) || 0) + 1);
-    }
-
-    if (exercise.repeatedError) {
-      repeatedErrorCount += 1;
     }
 
     if (exercise.recognitionSpeed === "no") {
@@ -1084,7 +1299,6 @@ function buildSubjectExerciseSnapshot(subject, exercises) {
       confidenceLevel: exercise.confidenceLevel || "",
       recognitionSpeed: exercise.recognitionSpeed || "",
       exactEbauType: exercise.exactEbauType || "",
-      repeatedError: Boolean(exercise.repeatedError),
       learnedRule: exercise.learnedRule || "",
     }));
 
@@ -1100,12 +1314,59 @@ function buildSubjectExerciseSnapshot(subject, exercises) {
     topErrors,
     confidenceDistribution,
     phaseDistribution,
-    repeatedErrorRate: total ? Number((repeatedErrorCount / total).toFixed(3)) : 0,
     recognitionMissRate: total ? Number((recognitionMissCount / total).toFixed(3)) : 0,
     falsePositiveRate: okCount ? Number((falsePositiveCount / okCount).toFixed(3)) : 0,
     blockPerformance,
     recentAttempts: recent,
   };
+}
+
+async function importExamFileAsExercises() {
+  const file = examImportFileInput.files?.[0];
+  if (!file) {
+    feedback.textContent = "Selecciona un archivo PDF o TXT antes de importar.";
+    return;
+  }
+
+  try {
+    importExamButton.disabled = true;
+    importExamButton.textContent = "Importando...";
+    feedback.textContent = "Leyendo examen y detectando ejercicios...";
+
+    const extractedText = await extractTextFromFile(file);
+    const importedExercises = buildImportedExercisesFromText(extractedText).filter(
+      (exercise) => exercise.ebauBlock && exercise.ebauSubtype
+    );
+
+    if (!importedExercises.length) {
+      feedback.textContent = "No pude detectar ejercicios utiles. Prueba con otro PDF/TXT.";
+      return;
+    }
+
+    const shouldImport = window.confirm(
+      `Se detectaron ${importedExercises.length} ejercicios de ${importedExercises[0].subject}. ¿Quieres anadirlos?`
+    );
+
+    if (!shouldImport) {
+      feedback.textContent = "Importacion cancelada.";
+      return;
+    }
+
+    const exercises = readExercises();
+    exercises.push(...importedExercises);
+    writeExercises(exercises);
+
+    feedback.textContent =
+      `Importados ${importedExercises.length} ejercicios como pendientes. ` +
+      "No afectan metricas hasta que registres resultado real.";
+    examImportFileInput.value = "";
+    render();
+  } catch (error) {
+    feedback.textContent = `No se pudo importar el examen: ${error.message || "error inesperado"}.`;
+  } finally {
+    importExamButton.disabled = false;
+    importExamButton.textContent = "Importar examen a ejercicios";
+  }
 }
 
 function buildSubjectExamSnapshot(subject, exams) {
@@ -1366,6 +1627,9 @@ exportJsonMateButton.addEventListener("click", () => exportSubjectJson("Mate"));
 exportJsonFisicaButton.addEventListener("click", () => exportSubjectJson("Fisica"));
 exportExamsJsonMateButton.addEventListener("click", () => exportSubjectExamsJson("Mate"));
 exportExamsJsonFisicaButton.addEventListener("click", () => exportSubjectExamsJson("Fisica"));
+importExamButton.addEventListener("click", () => {
+  importExamFileAsExercises();
+});
 clearDataButton.addEventListener("click", clearData);
 subjectInput.addEventListener("change", syncEbauInputsForSubject);
 examSubjectInput.addEventListener("change", () => {

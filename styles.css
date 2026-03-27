@@ -712,6 +712,25 @@ select:focus {
   justify-content: center;
 }
 
+.ghost-input {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #101926;
+  color: var(--text);
+  padding: 10px 12px;
+  min-height: 44px;
+}
+
+.ghost-input::file-selector-button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #162334;
+  color: var(--text);
+  padding: 6px 10px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
 .ghost-btn:hover {
   border-color: rgba(24, 34, 47, 0.35);
 }
@@ -738,6 +757,11 @@ select:focus {
     min-height: 44px;
     font-size: 0.85rem;
     flex: 1;
+  }
+
+  .ghost-input {
+    width: 100%;
+    min-height: 44px;
   }
 }
 

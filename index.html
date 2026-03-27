@@ -148,11 +148,6 @@
             />
           </label>
 
-          <label class="checkbox-wrap full-width">
-            <input id="repeatedError" name="repeatedError" type="checkbox" />
-            Ya habias fallado algo similar antes
-          </label>
-
           <label class="full-width">
             Regla aprendida
             <input
@@ -262,6 +257,8 @@
         <div class="history-actions">
           <button id="export-json-mate" class="ghost-btn" type="button">Exportar Mate (full)</button>
           <button id="export-json-fisica" class="ghost-btn" type="button">Exportar Fisica (full)</button>
+          <input id="exam-import-file" class="ghost-input" type="file" accept=".pdf,.txt" />
+          <button id="import-exam-btn" class="ghost-btn" type="button">Importar examen a ejercicios</button>
           <button id="clear-data" class="ghost-btn danger" type="button">Borrar datos</button>
         </div>
 
@@ -428,6 +425,7 @@
       </section>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
