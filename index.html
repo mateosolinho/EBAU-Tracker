@@ -166,60 +166,74 @@
       </section>
 
       <section class="card reveal mode-panel" data-mode="practice" aria-labelledby="dashboard-title">
-        <div class="card-title-row">
+        <button id="dashboard-toggle" class="section-header" type="button" aria-expanded="false">
           <h2 id="dashboard-title">Dashboard</h2>
-          <span class="pill">Patrones</span>
-        </div>
+          <span class="toggle-icon">▼</span>
+        </button>
 
-        <div class="subject-switch" role="tablist" aria-label="Vista de asignatura ejercicios">
-          <button id="practice-view-mate" class="subject-btn active" type="button" role="tab" aria-selected="true">
-            Mate
-          </button>
-          <button id="practice-view-fisica" class="subject-btn" type="button" role="tab" aria-selected="false">
-            Fisica
-          </button>
-        </div>
+        <div id="dashboard-content" class="section-content" hidden>
+          <div class="subject-switch" role="tablist" aria-label="Vista de asignatura ejercicios">
+            <button
+              id="practice-view-mate"
+              class="subject-btn active"
+              type="button"
+              role="tab"
+              aria-selected="true"
+            >
+              Mate
+            </button>
+            <button
+              id="practice-view-fisica"
+              class="subject-btn"
+              type="button"
+              role="tab"
+              aria-selected="false"
+            >
+              Fisica
+            </button>
+          </div>
 
-        <div class="stats-grid" id="stats-grid">
-          <article class="stat-box">
-            <h3>% aciertos total</h3>
-            <p id="total-accuracy">0%</p>
-          </article>
-          <article class="stat-box">
-            <h3>Total ejercicios</h3>
-            <p id="total-exercises">0</p>
-          </article>
-          <article class="stat-box">
-            <h3>Tiempo medio</h3>
-            <p id="avg-time">0 min</p>
-          </article>
-          <article class="stat-box">
-            <h3>Acierto 7 dias</h3>
-            <p id="accuracy-7d">0%</p>
-          </article>
-          <article class="stat-box">
-            <h3>Racha estudio</h3>
-            <p id="study-streak">0 dias</p>
-          </article>
-          <article class="stat-box">
-            <h3>Indice riesgo</h3>
-            <p id="risk-index">Bajo</p>
-          </article>
-        </div>
+          <div class="stats-grid" id="stats-grid">
+            <article class="stat-box">
+              <h3>% aciertos total</h3>
+              <p id="total-accuracy">0%</p>
+            </article>
+            <article class="stat-box">
+              <h3>Total ejercicios</h3>
+              <p id="total-exercises">0</p>
+            </article>
+            <article class="stat-box">
+              <h3>Tiempo medio</h3>
+              <p id="avg-time">0 min</p>
+            </article>
+            <article class="stat-box">
+              <h3>Acierto 7 dias</h3>
+              <p id="accuracy-7d">0%</p>
+            </article>
+            <article class="stat-box">
+              <h3>Racha estudio</h3>
+              <p id="study-streak">0 dias</p>
+            </article>
+            <article class="stat-box">
+              <h3>Indice riesgo</h3>
+              <p id="risk-index">Bajo</p>
+            </article>
+          </div>
 
-        <div class="insights-grid">
-          <article>
-            <h3>% por bloque</h3>
-            <ul id="topic-accuracy" class="list"></ul>
-          </article>
-          <article>
-            <h3>Errores TOP 3</h3>
-            <ul id="top-errors" class="list"></ul>
-          </article>
-          <article>
-            <h3>Bloques debiles</h3>
-            <ul id="weak-topics" class="list"></ul>
-          </article>
+          <div class="insights-grid">
+            <article>
+              <h3>% por bloque</h3>
+              <ul id="topic-accuracy" class="list"></ul>
+            </article>
+            <article>
+              <h3>Errores TOP 3</h3>
+              <ul id="top-errors" class="list"></ul>
+            </article>
+            <article>
+              <h3>Bloques debiles</h3>
+              <ul id="weak-topics" class="list"></ul>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -254,9 +268,17 @@
           <span class="pill">Filtro rapido</span>
         </div>
 
+        <div class="subject-switch" role="tablist" aria-label="Vista de asignatura historial">
+          <button id="history-view-mate" class="subject-btn active" type="button" role="tab" aria-selected="true">
+            Mate
+          </button>
+          <button id="history-view-fisica" class="subject-btn" type="button" role="tab" aria-selected="false">
+            Fisica
+          </button>
+        </div>
+
         <div class="history-actions">
-          <button id="export-json-mate" class="ghost-btn" type="button">Exportar Mate (full)</button>
-          <button id="export-json-fisica" class="ghost-btn" type="button">Exportar Fisica (full)</button>
+          <button id="export-json-current" class="ghost-btn" type="button">Exportar asignatura actual (full)</button>
           <input id="exam-import-file" class="ghost-input" type="file" accept=".pdf,.txt" />
           <button id="import-exam-btn" class="ghost-btn" type="button">Importar examen a ejercicios</button>
           <button id="clear-data" class="ghost-btn danger" type="button">Borrar datos</button>

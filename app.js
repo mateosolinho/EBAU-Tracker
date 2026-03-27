@@ -24,6 +24,10 @@ const subjectViewButtons = {
     Mate: document.getElementById("practice-view-mate"),
     Fisica: document.getElementById("practice-view-fisica"),
   },
+  history: {
+    Mate: document.getElementById("history-view-mate"),
+    Fisica: document.getElementById("history-view-fisica"),
+  },
   exam: {
     Mate: document.getElementById("exam-view-mate"),
     Fisica: document.getElementById("exam-view-fisica"),
@@ -59,13 +63,14 @@ const outputs = {
   priorityConfidence: document.getElementById("priority-confidence"),
 };
 
-const exportJsonMateButton = document.getElementById("export-json-mate");
-const exportJsonFisicaButton = document.getElementById("export-json-fisica");
+const exportJsonCurrentButton = document.getElementById("export-json-current");
 const exportExamsJsonMateButton = document.getElementById("export-exams-json-mate");
 const exportExamsJsonFisicaButton = document.getElementById("export-exams-json-fisica");
 const clearDataButton = document.getElementById("clear-data");
 const importExamButton = document.getElementById("import-exam-btn");
 const examImportFileInput = document.getElementById("exam-import-file");
+const dashboardToggle = document.getElementById("dashboard-toggle");
+const dashboardContent = document.getElementById("dashboard-content");
 const coachToggle = document.getElementById("coach-toggle");
 const coachContent = document.getElementById("coach-content");
 const subjectInput = document.getElementById("subject");
@@ -1176,8 +1181,12 @@ function setSubjectView(mode, subject) {
     viewState.practiceSubject = subject;
     subjectViewButtons.practice.Mate.classList.toggle("active", subject === "Mate");
     subjectViewButtons.practice.Fisica.classList.toggle("active", subject === "Fisica");
+    subjectViewButtons.history.Mate.classList.toggle("active", subject === "Mate");
+    subjectViewButtons.history.Fisica.classList.toggle("active", subject === "Fisica");
     subjectViewButtons.practice.Mate.setAttribute("aria-selected", subject === "Mate" ? "true" : "false");
     subjectViewButtons.practice.Fisica.setAttribute("aria-selected", subject === "Fisica" ? "true" : "false");
+    subjectViewButtons.history.Mate.setAttribute("aria-selected", subject === "Mate" ? "true" : "false");
+    subjectViewButtons.history.Fisica.setAttribute("aria-selected", subject === "Fisica" ? "true" : "false");
   }
 
   if (mode === "exam") {
@@ -1492,6 +1501,13 @@ function exportSubjectJson(subjectScope) {
       : `Export AI-ready de ${subjectScope} generado (ejercicios + examenes).`;
 }
 
+function updatePracticeActionsLabel() {
+  if (!exportJsonCurrentButton) {
+    return;
+  }
+  exportJsonCurrentButton.textContent = `Exportar ${viewState.practiceSubject} (full)`;
+}
+
 function exportExamsJson() {
   exportSubjectExamsJson("all");
 }
@@ -1532,6 +1548,7 @@ function clearData() {
 function render() {
   const exercises = readExercises();
   const exams = readExams();
+  updatePracticeActionsLabel();
   renderDashboard(exercises, exams);
   renderHistory(exercises);
   renderExamHistory(exams);
@@ -1623,8 +1640,7 @@ for (const input of Object.values(filters)) {
   input.addEventListener("change", render);
 }
 
-exportJsonMateButton.addEventListener("click", () => exportSubjectJson("Mate"));
-exportJsonFisicaButton.addEventListener("click", () => exportSubjectJson("Fisica"));
+exportJsonCurrentButton.addEventListener("click", () => exportSubjectJson(viewState.practiceSubject));
 exportExamsJsonMateButton.addEventListener("click", () => exportSubjectExamsJson("Mate"));
 exportExamsJsonFisicaButton.addEventListener("click", () => exportSubjectExamsJson("Fisica"));
 importExamButton.addEventListener("click", () => {
@@ -1642,6 +1658,8 @@ modeButtons.practice.addEventListener("click", () => setMode("practice"));
 modeButtons.exam.addEventListener("click", () => setMode("exam"));
 subjectViewButtons.practice.Mate.addEventListener("click", () => setSubjectView("practice", "Mate"));
 subjectViewButtons.practice.Fisica.addEventListener("click", () => setSubjectView("practice", "Fisica"));
+subjectViewButtons.history.Mate.addEventListener("click", () => setSubjectView("practice", "Mate"));
+subjectViewButtons.history.Fisica.addEventListener("click", () => setSubjectView("practice", "Fisica"));
 subjectViewButtons.exam.Mate.addEventListener("click", () => setSubjectView("exam", "Mate"));
 subjectViewButtons.exam.Fisica.addEventListener("click", () => setSubjectView("exam", "Fisica"));
 examTargetScoreInput.addEventListener("change", () => {
@@ -1668,6 +1686,12 @@ coachToggle.addEventListener("click", () => {
   const isExpanded = coachToggle.getAttribute("aria-expanded") === "true";
   coachToggle.setAttribute("aria-expanded", String(!isExpanded));
   coachContent.toggleAttribute("hidden");
+});
+
+dashboardToggle.addEventListener("click", () => {
+  const isExpanded = dashboardToggle.getAttribute("aria-expanded") === "true";
+  dashboardToggle.setAttribute("aria-expanded", String(!isExpanded));
+  dashboardContent.toggleAttribute("hidden");
 });
 
 render();
