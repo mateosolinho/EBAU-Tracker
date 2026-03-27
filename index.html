@@ -26,10 +26,10 @@
         <div class="hero-controls">
           <div class="mode-switch" role="tablist" aria-label="Seleccion de modo">
             <button id="mode-practice" class="mode-btn active" type="button" role="tab" aria-selected="true">
-              Modo ejercicios
+              Ejercicios
             </button>
             <button id="mode-exam" class="mode-btn" type="button" role="tab" aria-selected="false">
-              Modo examenes completos
+              Examenes
             </button>
           </div>
           <div class="subject-switch compact global-subject-switch" role="tablist" aria-label="Asignatura global">
@@ -40,8 +40,43 @@
               Fisica
             </button>
           </div>
+          <div id="practice-quick-actions" class="header-quick-actions">
+            <button id="open-dashboard-modal" class="ghost-btn" type="button">Abrir dashboard</button>
+            <button id="open-import-modal" class="ghost-btn" type="button">Subir PDF examen</button>
+          </div>
         </div>
       </header>
+
+      <div id="import-modal" class="modal hidden" aria-hidden="true">
+        <div class="modal-backdrop" data-modal-close="import"></div>
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="import-title">
+          <button id="close-import-modal" class="modal-close" type="button" aria-label="Cerrar modal de importacion">✕</button>
+
+          <section
+            id="practice-import-card"
+            class="card reveal mode-panel"
+            data-mode="practice"
+            aria-labelledby="import-title"
+          >
+            <div class="card-title-row">
+              <h2 id="import-title">Subir examen (PDF/TXT)</h2>
+              <span class="pill">Primero</span>
+            </div>
+
+            <p class="muted-copy">Guarda aqui el examen que vas a trabajar antes de registrar ejercicios sueltos.</p>
+
+            <div class="history-actions import-actions">
+              <input id="exam-import-file" class="ghost-input" type="file" accept=".pdf,.txt" />
+              <button id="import-exam-btn" class="ghost-btn" type="button">Guardar PDF del examen</button>
+            </div>
+            <p id="pdf-registry-feedback" class="feedback" role="status" aria-live="polite"></p>
+            <div class="pdf-registry">
+              <h3>PDFs guardados</h3>
+              <div id="pdf-registry-list" class="pdf-registry-list"></div>
+            </div>
+          </section>
+        </div>
+      </div>
 
       <section
         id="practice-add-card"
@@ -66,6 +101,13 @@
               <option value="">Selecciona</option>
               <option value="Mate">Mate</option>
               <option value="Fisica">Fisica</option>
+            </select>
+          </label>
+
+          <label>
+            Examen relacionado (opcional)
+            <select id="exerciseExamLink" name="exerciseExamLink">
+              <option value="">Sin relacionar</option>
             </select>
           </label>
 
@@ -162,24 +204,30 @@
             />
           </label>
 
-          <button class="cta full-width" type="submit">Guardar ejercicio</button>
+          <button id="exercise-submit" class="cta full-width" type="submit">Guardar ejercicio</button>
+          <button id="exercise-cancel-edit" class="ghost-btn full-width hidden" type="button">Cancelar edicion</button>
         </form>
 
         <p id="form-feedback" class="feedback" role="status" aria-live="polite"></p>
       </section>
 
-      <section
-        id="practice-dashboard-card"
-        class="card reveal mode-panel collapsible-card"
-        data-mode="practice"
-        aria-labelledby="dashboard-title"
-      >
-        <button id="dashboard-toggle" class="section-header" type="button" aria-expanded="false">
-          <h2 id="dashboard-title">Dashboard</h2>
-          <span class="toggle-icon">▼</span>
-        </button>
+      <div id="dashboard-modal" class="modal hidden" aria-hidden="true">
+        <div class="modal-backdrop" data-modal-close="dashboard"></div>
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="dashboard-title">
+          <button id="close-dashboard-modal" class="modal-close" type="button" aria-label="Cerrar modal de dashboard">✕</button>
 
-        <div id="dashboard-content" class="section-content" hidden>
+          <section
+            id="practice-dashboard-card"
+            class="card reveal mode-panel collapsible-card"
+            data-mode="practice"
+            aria-labelledby="dashboard-title"
+          >
+            <button id="dashboard-toggle" class="section-header" type="button" aria-expanded="false">
+              <h2 id="dashboard-title">Dashboard</h2>
+              <span class="toggle-icon">▼</span>
+            </button>
+
+            <div id="dashboard-content" class="section-content" hidden>
 
           <div class="stats-grid" id="stats-grid">
             <article class="stat-box">
@@ -238,8 +286,10 @@
             <p id="ebau-priority" class="coach-priority">Prioridad ROI: pendiente</p>
             <ul id="ebau-breakdown" class="list"></ul>
           </article>
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
 
       <section
         id="practice-history-card"
@@ -257,24 +307,6 @@
             <button id="export-json-current" class="ghost-btn" type="button">Exportar asignatura actual</button>
           </div>
         </div>
-
-        <div id="history-linked-banner" class="history-linked-banner hidden">
-          <span id="history-linked-text"></span>
-          <button id="clear-history-linked" class="item-action-btn delete" type="button">Quitar filtro</button>
-        </div>
-
-        <details class="import-panel">
-          <summary>Importacion de examen</summary>
-          <div class="history-actions import-actions">
-            <input id="exam-import-file" class="ghost-input" type="file" accept=".pdf,.txt" />
-            <button id="import-exam-btn" class="ghost-btn" type="button">Importar examen a ejercicios</button>
-          </div>
-          <p id="pdf-registry-feedback" class="feedback" role="status" aria-live="polite"></p>
-          <div class="pdf-registry">
-            <h3>PDFs guardados</h3>
-            <div id="pdf-registry-list" class="pdf-registry-list"></div>
-          </div>
-        </details>
 
         <details class="filters-panel">
           <summary>Filtros del historial</summary>
@@ -309,6 +341,9 @@
               Solo ejercicios con error
             </label>
           </form>
+          <div id="clear-history-linked-wrap" class="filters-actions hidden">
+            <button id="clear-history-linked" class="item-action-btn delete" type="button">Quitar filtro de examen</button>
+          </div>
         </details>
 
         <div id="history-list" class="history-list"></div>
@@ -393,7 +428,8 @@
             />
           </label>
 
-          <button class="cta full-width" type="submit">Guardar intento de examen</button>
+          <button id="exam-submit" class="cta full-width" type="submit">Guardar intento de examen</button>
+          <button id="exam-cancel-edit" class="ghost-btn full-width hidden" type="button">Cancelar edicion</button>
         </form>
 
         <p id="exam-feedback" class="feedback" role="status" aria-live="polite"></p>

@@ -8,10 +8,15 @@ let pdfRegistryCache = [];
 
 const form = document.getElementById("exercise-form");
 const feedback = document.getElementById("form-feedback");
+const exerciseSubmitButton = document.getElementById("exercise-submit");
+const exerciseCancelEditButton = document.getElementById("exercise-cancel-edit");
 const historyList = document.getElementById("history-list");
 const examForm = document.getElementById("exam-form");
 const examFeedback = document.getElementById("exam-feedback");
+const examSubmitButton = document.getElementById("exam-submit");
+const examCancelEditButton = document.getElementById("exam-cancel-edit");
 const examHistoryList = document.getElementById("exam-history-list");
+const exerciseExamLinkInput = document.getElementById("exerciseExamLink");
 const examSubjectInput = document.getElementById("examSubject");
 const examWeakBlockInput = document.getElementById("examWeakBlock");
 const examPdfLinkInput = document.getElementById("examPdfLink");
@@ -70,12 +75,18 @@ const importExamButton = document.getElementById("import-exam-btn");
 const examImportFileInput = document.getElementById("exam-import-file");
 const pdfRegistryList = document.getElementById("pdf-registry-list");
 const pdfRegistryFeedback = document.getElementById("pdf-registry-feedback");
-const historyLinkedBanner = document.getElementById("history-linked-banner");
-const historyLinkedText = document.getElementById("history-linked-text");
 const clearHistoryLinkedButton = document.getElementById("clear-history-linked");
+const clearHistoryLinkedWrap = document.getElementById("clear-history-linked-wrap");
 const dashboardToggle = document.getElementById("dashboard-toggle");
 const dashboardContent = document.getElementById("dashboard-content");
 const dashboardSection = document.getElementById("practice-dashboard-card");
+const practiceQuickActions = document.getElementById("practice-quick-actions");
+const openDashboardModalButton = document.getElementById("open-dashboard-modal");
+const openImportModalButton = document.getElementById("open-import-modal");
+const closeDashboardModalButton = document.getElementById("close-dashboard-modal");
+const closeImportModalButton = document.getElementById("close-import-modal");
+const dashboardModal = document.getElementById("dashboard-modal");
+const importModal = document.getElementById("import-modal");
 const subjectInput = document.getElementById("subject");
 const ebauBlockInput = document.getElementById("ebauBlock");
 const ebauSubtypeInput = document.getElementById("ebauSubtype");
@@ -94,8 +105,10 @@ const resultLabel = {
   pending: "⏳ Pendiente",
 };
 
-let historyLinkedPdfFilter = "";
-let historyLinkedPdfName = "";
+let historyLinkedExamFilter = "";
+let historyLinkedExamName = "";
+let editingExerciseId = "";
+let editingExamId = "";
 
 const SUBJECT_KEYWORDS = {
   Mate: [
@@ -321,6 +334,36 @@ function writeTargets(targets) {
   localStorage.setItem(TARGETS_STORAGE_KEY, JSON.stringify(targets));
 }
 
+function formatExamLabel(exam) {
+  const score = Number.isFinite(Number(exam.score)) ? Number(exam.score).toFixed(2) : "-";
+  return `${exam.date} · ${exam.examType} · ${score}`;
+}
+
+function renderExerciseExamOptions(subject, keepValue = "") {
+  if (!exerciseExamLinkInput) {
+    return;
+  }
+
+  const exams = readExams()
+    .filter((exam) => exam.subject === subject)
+    .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
+
+  exerciseExamLinkInput.innerHTML = "";
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = exams.length ? "Sin relacionar" : "Sin examenes en esta asignatura";
+  exerciseExamLinkInput.appendChild(defaultOption);
+
+  for (const exam of exams) {
+    const option = document.createElement("option");
+    option.value = exam.id;
+    option.textContent = formatExamLabel(exam);
+    exerciseExamLinkInput.appendChild(option);
+  }
+
+  exerciseExamLinkInput.value = exams.some((exam) => exam.id === keepValue) ? keepValue : "";
+}
+
 function setExamWeakBlockOptions(subject, keepValue = "") {
   examWeakBlockInput.innerHTML = "";
   const placeholder = document.createElement("option");
@@ -376,6 +419,8 @@ function asRiskLabel(score) {
 function buildExercise(formData) {
   const learnedRule = String(formData.get("learnedRule") || "").trim();
   const exactEbauType = String(formData.get("exactEbauType") || "").trim();
+  const linkedExamId = String(formData.get("exerciseExamLink") || "");
+  const linkedExam = readExams().find((exam) => exam.id === linkedExamId);
 
   return {
     id: crypto.randomUUID(),
@@ -390,6 +435,10 @@ function buildExercise(formData) {
     confidenceLevel: String(formData.get("confidenceLevel") || ""),
     mainError: String(formData.get("mainError") || ""),
     errorPhase: String(formData.get("errorPhase") || ""),
+    exerciseExamId: linkedExam?.id || "",
+    exerciseExamLabel: linkedExam ? formatExamLabel(linkedExam) : "",
+    sourcePdfId: linkedExam?.examPdfId || "",
+    sourcePdfName: linkedExam?.examPdfName || "",
     exactEbauType,
     learnedRule,
     createdAt: Date.now(),
@@ -1230,7 +1279,7 @@ function applyFilters(exercises) {
 
   return exercises
     .filter((ex) => ex.subject === viewState.practiceSubject)
-    .filter((ex) => (historyLinkedPdfFilter ? ex.sourcePdfId === historyLinkedPdfFilter : true))
+    .filter((ex) => (historyLinkedExamFilter ? ex.exerciseExamId === historyLinkedExamFilter : true))
     .filter((ex) => {
       if (!blockText) {
         return true;
@@ -1247,21 +1296,59 @@ function applyFilters(exercises) {
 }
 
 function openLinkedExercisesForExam(exam) {
-  if (!exam?.examPdfId) {
-    examFeedback.textContent = "Este examen no tiene PDF asociado.";
+  if (!exam?.id) {
     return;
   }
 
-  historyLinkedPdfFilter = exam.examPdfId;
-  historyLinkedPdfName = exam.examPdfName || "PDF asociado";
+  historyLinkedExamFilter = exam.id;
+  historyLinkedExamName = formatExamLabel(exam);
   setMode("practice");
   setSubjectView("practice", exam.subject || viewState.practiceSubject);
 }
 
 function clearLinkedHistoryFilter() {
-  historyLinkedPdfFilter = "";
-  historyLinkedPdfName = "";
+  historyLinkedExamFilter = "";
+  historyLinkedExamName = "";
   render();
+}
+
+function setExerciseEditMode(isEditing) {
+  if (exerciseSubmitButton) {
+    exerciseSubmitButton.textContent = isEditing ? "Actualizar ejercicio" : "Guardar ejercicio";
+  }
+  exerciseCancelEditButton?.classList.toggle("hidden", !isEditing);
+}
+
+function setExamEditMode(isEditing) {
+  if (examSubmitButton) {
+    examSubmitButton.textContent = isEditing
+      ? "Actualizar intento de examen"
+      : "Guardar intento de examen";
+  }
+  examCancelEditButton?.classList.toggle("hidden", !isEditing);
+}
+
+function resetExerciseEditMode() {
+  editingExerciseId = "";
+  form.reset();
+  document.getElementById("date").valueAsDate = new Date();
+  subjectInput.value = viewState.practiceSubject;
+  syncEbauInputsForSubject();
+  setSubtypeOptionsForBlock(ebauBlockInput.value);
+  renderExerciseExamOptions(viewState.practiceSubject, "");
+  setExerciseEditMode(false);
+}
+
+function resetExamEditMode() {
+  editingExamId = "";
+  examForm.reset();
+  document.getElementById("examDate").valueAsDate = new Date();
+  examSubjectInput.value = viewState.examSubject;
+  setExamWeakBlockOptions(viewState.examSubject, "");
+  if (examPdfLinkInput) {
+    examPdfLinkInput.value = "";
+  }
+  setExamEditMode(false);
 }
 
 function appendStrongParagraph(container, label, value) {
@@ -1282,6 +1369,31 @@ function createItemActionButton(label, className, onClick) {
   return button;
 }
 
+function wireHistoryCardEdit(item, onEdit) {
+  if (!item || typeof onEdit !== "function") {
+    return;
+  }
+
+  item.classList.add("history-item-clickable");
+  item.setAttribute("role", "button");
+  item.setAttribute("tabindex", "0");
+
+  item.addEventListener("click", (event) => {
+    if (event.target.closest("button")) {
+      return;
+    }
+    onEdit();
+  });
+
+  item.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    event.preventDefault();
+    onEdit();
+  });
+}
+
 function deleteExerciseById(id) {
   const shouldDelete = window.confirm("¿Seguro que quieres borrar este ejercicio?");
   if (!shouldDelete) {
@@ -1295,57 +1407,34 @@ function deleteExerciseById(id) {
 }
 
 function editExerciseById(id) {
-  const exercises = readExercises();
-  const index = exercises.findIndex((exercise) => exercise.id === id);
-  if (index < 0) {
+  const exercise = readExercises().find((item) => item.id === id);
+  if (!exercise) {
     return;
   }
 
-  const current = exercises[index];
-  const result = window
-    .prompt("Resultado (ok, fail, warn, pending)", current.result || "pending")
-    ?.trim()
-    .toLowerCase();
-  if (!result) {
-    return;
-  }
+  editingExerciseId = id;
+  setMode("practice");
+  setSubjectView("practice", exercise.subject || "Mate");
 
-  if (!["ok", "fail", "warn", "pending"].includes(result)) {
-    feedback.textContent = "Resultado invalido. Usa: ok, fail, warn o pending.";
-    return;
-  }
+  document.getElementById("date").value = exercise.date || "";
+  subjectInput.value = exercise.subject || viewState.practiceSubject;
+  syncEbauInputsForSubject();
+  ebauBlockInput.value = exercise.ebauBlock || "";
+  setSubtypeOptionsForBlock(ebauBlockInput.value);
+  ebauSubtypeInput.value = exercise.ebauSubtype || "";
+  renderExerciseExamOptions(subjectInput.value, exercise.exerciseExamId || "");
+  document.getElementById("result").value = exercise.result || "";
+  document.getElementById("minutes").value = String(exercise.minutes ?? "");
+  document.getElementById("recognitionSpeed").value = exercise.recognitionSpeed || "";
+  document.getElementById("confidenceLevel").value = exercise.confidenceLevel || "";
+  document.getElementById("mainError").value = exercise.mainError || "";
+  document.getElementById("errorPhase").value = exercise.errorPhase || "";
+  document.getElementById("exactEbauType").value = exercise.exactEbauType || "";
+  document.getElementById("learnedRule").value = exercise.learnedRule || "";
 
-  const minutesText = window.prompt(
-    "Tiempo en minutos (0-300)",
-    String(current.minutes ?? 0)
-  );
-  if (minutesText === null) {
-    return;
-  }
-  const minutes = Number(minutesText);
-  if (!Number.isFinite(minutes) || minutes < 0 || minutes > 300) {
-    feedback.textContent = "Tiempo invalido.";
-    return;
-  }
-
-  const mainError = window.prompt("Error principal", current.mainError || "")?.trim();
-  if (mainError === null || !mainError) {
-    return;
-  }
-
-  const learnedRule = window.prompt("Regla aprendida", current.learnedRule || "") ?? "";
-
-  exercises[index] = {
-    ...current,
-    result,
-    minutes,
-    mainError,
-    learnedRule: learnedRule.trim(),
-  };
-
-  writeExercises(exercises);
-  feedback.textContent = "Ejercicio actualizado.";
-  render();
+  setExerciseEditMode(true);
+  feedback.textContent = "Modo edicion: actualiza los campos y guarda el ejercicio.";
+  form.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function deleteExamById(id) {
@@ -1361,58 +1450,40 @@ function deleteExamById(id) {
 }
 
 function editExamById(id) {
-  const exams = readExams();
-  const index = exams.findIndex((exam) => exam.id === id);
-  if (index < 0) {
+  const exam = readExams().find((item) => item.id === id);
+  if (!exam) {
     return;
   }
 
-  const current = exams[index];
-  const scoreText = window.prompt("Nota (0-10)", String(current.score ?? ""));
-  if (scoreText === null) {
-    return;
-  }
-  const score = Number(scoreText);
-  if (!Number.isFinite(score) || score < 0 || score > 10) {
-    examFeedback.textContent = "Nota invalida.";
-    return;
-  }
+  editingExamId = id;
+  setMode("exam");
+  setSubjectView("exam", exam.subject || "Mate");
 
-  const weakBlock = window.prompt("Bloque mas flojo", current.weakBlock || "")?.trim();
-  if (weakBlock === null || !weakBlock) {
-    return;
-  }
+  document.getElementById("examDate").value = exam.date || "";
+  examSubjectInput.value = exam.subject || viewState.examSubject;
+  setExamWeakBlockOptions(examSubjectInput.value, exam.weakBlock || "");
+  document.getElementById("examType").value = exam.examType || "";
+  document.getElementById("examScore").value = String(exam.score ?? "");
+  document.getElementById("examMinutes").value = String(exam.minutes ?? "");
+  examPdfLinkInput.value = exam.examPdfId || "";
+  document.getElementById("examMainError").value = exam.mainError || "";
+  document.getElementById("examActionPlan").value = exam.actionPlan || "";
 
-  const mainError = window.prompt("Error dominante", current.mainError || "")?.trim();
-  if (mainError === null || !mainError) {
-    return;
-  }
-
-  const actionPlan = window.prompt("Plan de accion", current.actionPlan || "") ?? "";
-
-  exams[index] = {
-    ...current,
-    score,
-    weakBlock,
-    mainError,
-    actionPlan: actionPlan.trim(),
-  };
-
-  writeExams(exams);
-  examFeedback.textContent = "Examen actualizado.";
-  render();
+  setExamEditMode(true);
+  examFeedback.textContent = "Modo edicion: actualiza los campos y guarda el examen.";
+  examForm.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function renderHistory(exercises) {
   const filtered = applyFilters(exercises);
   historyList.innerHTML = "";
 
-  if (historyLinkedPdfFilter) {
-    historyLinkedBanner.classList.remove("hidden");
-    historyLinkedText.textContent = `Mostrando ejercicios del PDF: ${historyLinkedPdfName}`;
+  if (historyLinkedExamFilter) {
+    clearHistoryLinkedButton?.classList.remove("hidden");
+    clearHistoryLinkedWrap?.classList.remove("hidden");
   } else {
-    historyLinkedBanner.classList.add("hidden");
-    historyLinkedText.textContent = "";
+    clearHistoryLinkedButton?.classList.add("hidden");
+    clearHistoryLinkedWrap?.classList.add("hidden");
   }
 
   if (!filtered.length) {
@@ -1425,6 +1496,7 @@ function renderHistory(exercises) {
   for (const ex of filtered) {
     const item = document.createElement("article");
     item.className = `history-item ${ex.result || "pending"}`;
+    wireHistoryCardEdit(item, () => editExerciseById(ex.id));
 
     const topRow = document.createElement("div");
     topRow.className = "history-item-top";
@@ -1477,6 +1549,7 @@ function renderHistory(exercises) {
     );
     appendStrongParagraph(item, "Confianza", ex.confidenceLevel || "-");
     appendStrongParagraph(item, "Tipo exacto EBAU", ex.exactEbauType || "-");
+    appendStrongParagraph(item, "Examen relacionado", ex.exerciseExamLabel || "-");
     appendStrongParagraph(item, "PDF origen", ex.sourcePdfName || "-");
     appendStrongParagraph(item, "Origen", ex.importedFromExam ? "Importado de examen" : "Manual");
     appendStrongParagraph(item, "Regla", ex.learnedRule || "-");
@@ -1542,6 +1615,7 @@ function renderExamHistory(exams) {
   for (const exam of sorted) {
     const item = document.createElement("article");
     item.className = "history-item";
+    wireHistoryCardEdit(item, () => editExamById(exam.id));
 
     const topRow = document.createElement("div");
     topRow.className = "history-item-top";
@@ -1552,11 +1626,9 @@ function renderExamHistory(exams) {
 
     const actions = document.createElement("div");
     actions.className = "item-actions";
-    if (exam.examPdfId) {
-      actions.append(
-        createItemActionButton("Ver ejercicios", "edit", () => openLinkedExercisesForExam(exam))
-      );
-    }
+    actions.append(
+      createItemActionButton("Ver ejercicios", "edit", () => openLinkedExercisesForExam(exam))
+    );
     actions.append(
       createItemActionButton("Editar", "edit", () => editExamById(exam.id)),
       createItemActionButton("Borrar", "delete", () => deleteExamById(exam.id))
@@ -1646,6 +1718,40 @@ function setMode(modeName) {
     "aria-selected",
     activeMode === "exam" ? "true" : "false"
   );
+
+  if (practiceQuickActions) {
+    practiceQuickActions.classList.toggle("hidden", activeMode !== "practice");
+  }
+
+  if (activeMode !== "practice") {
+    closeModal(dashboardModal);
+    closeModal(importModal);
+  }
+}
+
+function updateBodyModalState() {
+  const hasOpenModal =
+    (dashboardModal && !dashboardModal.classList.contains("hidden")) ||
+    (importModal && !importModal.classList.contains("hidden"));
+  document.body.classList.toggle("modal-open", Boolean(hasOpenModal));
+}
+
+function openModal(modal) {
+  if (!modal) {
+    return;
+  }
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+  updateBodyModalState();
+}
+
+function closeModal(modal) {
+  if (!modal) {
+    return;
+  }
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
+  updateBodyModalState();
 }
 
 function buildSubjectExerciseSnapshot(subject, exercises) {
@@ -1736,6 +1842,8 @@ function buildSubjectExerciseSnapshot(subject, exercises) {
       confidenceLevel: exercise.confidenceLevel || "",
       recognitionSpeed: exercise.recognitionSpeed || "",
       exactEbauType: exercise.exactEbauType || "",
+      exerciseExamId: exercise.exerciseExamId || "",
+      exerciseExamLabel: exercise.exerciseExamLabel || "",
       importedFromExam: Boolean(exercise.importedFromExam),
       sourceQuestion: exercise.sourceQuestion || "",
       sourcePdfId: exercise.sourcePdfId || "",
@@ -1771,43 +1879,17 @@ async function importExamFileAsExercises() {
 
   try {
     importExamButton.disabled = true;
-    importExamButton.textContent = "Importando...";
-    feedback.textContent = "Leyendo examen y detectando ejercicios...";
-
-    const extractedText = await extractTextFromFile(file);
-    const previewExercises = buildImportedExercisesFromText(extractedText).filter(
-      (exercise) => exercise.ebauBlock && exercise.ebauSubtype
-    );
-
-    if (!previewExercises.length) {
-      feedback.textContent = "No pude detectar ejercicios utiles. Prueba con otro PDF/TXT.";
-      return;
-    }
-
-    const shouldImport = window.confirm(
-      `Se detectaron ${previewExercises.length} ejercicios de ${previewExercises[0].subject}. ¿Quieres anadirlos?`
-    );
-
-    if (!shouldImport) {
-      feedback.textContent = "Importacion cancelada.";
-      return;
-    }
+    importExamButton.textContent = "Guardando...";
+    feedback.textContent = "Guardando PDF del examen...";
 
     const savedPdfRecord = await savePdfRecord(file);
-    const importedExercises = buildImportedExercisesFromText(extractedText, savedPdfRecord).filter(
-      (exercise) => exercise.ebauBlock && exercise.ebauSubtype
-    );
 
-    const exercises = readExercises();
-    exercises.push(...importedExercises);
-    writeExercises(exercises);
-
-    feedback.textContent =
-      `Importados ${importedExercises.length} ejercicios como pendientes. ` +
-      "No afectan metricas hasta que registres resultado real.";
+    feedback.textContent = savedPdfRecord
+      ? "PDF guardado. Ahora puedes relacionar ejercicios y examen completo manualmente."
+      : "No se pudo guardar. Solo se aceptan archivos PDF.";
     pdfRegistryFeedback.textContent = savedPdfRecord
       ? "PDF guardado en el registro local."
-      : "Archivo importado (solo se registran PDFs).";
+      : "Solo se registran archivos PDF.";
     examImportFileInput.value = "";
     renderPdfRegistry();
     render();
@@ -1815,7 +1897,7 @@ async function importExamFileAsExercises() {
     feedback.textContent = `No se pudo importar el examen: ${error.message || "error inesperado"}.`;
   } finally {
     importExamButton.disabled = false;
-    importExamButton.textContent = "Importar examen a ejercicios";
+    importExamButton.textContent = "Guardar PDF del examen";
   }
 }
 
@@ -1993,6 +2075,7 @@ function render() {
   const exercises = readExercises();
   const exams = readExams();
   updatePracticeActionsLabel();
+  renderExerciseExamOptions(viewState.practiceSubject, exerciseExamLinkInput?.value || "");
   renderDashboard(exercises, exams);
   renderHistory(exercises);
   renderExamHistory(exams);
@@ -2028,12 +2111,26 @@ form.addEventListener("submit", (event) => {
     }
 
     const exercises = readExercises();
-    exercises.push(exercise);
+    if (editingExerciseId) {
+      const index = exercises.findIndex((item) => item.id === editingExerciseId);
+      if (index >= 0) {
+        exercises[index] = {
+          ...exercise,
+          id: exercises[index].id,
+          createdAt: exercises[index].createdAt,
+        };
+      } else {
+        exercises.push(exercise);
+      }
+    } else {
+      exercises.push(exercise);
+    }
     writeExercises(exercises);
 
-    form.reset();
-    document.getElementById("date").valueAsDate = new Date();
-    feedback.textContent = "Ejercicio guardado. Patrones actualizados.";
+    feedback.textContent = editingExerciseId
+      ? "Ejercicio actualizado. Patrones recalculados."
+      : "Ejercicio guardado. Patrones actualizados.";
+    resetExerciseEditMode();
     render();
   } catch {
     feedback.textContent = "No se pudo guardar. Recarga la pagina e intentalo de nuevo.";
@@ -2065,17 +2162,40 @@ examForm.addEventListener("submit", (event) => {
     }
 
     const exams = readExams();
-    exams.push(exam);
+    if (editingExamId) {
+      const index = exams.findIndex((item) => item.id === editingExamId);
+      if (index >= 0) {
+        exams[index] = {
+          ...exam,
+          id: exams[index].id,
+          createdAt: exams[index].createdAt,
+        };
+      } else {
+        exams.push(exam);
+      }
+    } else {
+      exams.push(exam);
+    }
     writeExams(exams);
 
-    examForm.reset();
-    document.getElementById("examDate").valueAsDate = new Date();
-    setExamWeakBlockOptions("", "");
-    examFeedback.textContent = "Intento de examen guardado.";
+    examFeedback.textContent = editingExamId
+      ? "Examen actualizado."
+      : "Intento de examen guardado.";
+    resetExamEditMode();
     render();
   } catch {
     examFeedback.textContent = "No se pudo guardar el examen. Recarga e intentalo de nuevo.";
   }
+});
+
+exerciseCancelEditButton?.addEventListener("click", () => {
+  resetExerciseEditMode();
+  feedback.textContent = "Edicion cancelada.";
+});
+
+examCancelEditButton?.addEventListener("click", () => {
+  resetExamEditMode();
+  examFeedback.textContent = "Edicion cancelada.";
 });
 
 for (const input of Object.values(filters)) {
@@ -2101,6 +2221,28 @@ ebauBlockInput.addEventListener("change", () => {
 });
 modeButtons.practice.addEventListener("click", () => setMode("practice"));
 modeButtons.exam.addEventListener("click", () => setMode("exam"));
+openDashboardModalButton?.addEventListener("click", () => {
+  dashboardToggle?.setAttribute("aria-expanded", "true");
+  dashboardContent?.removeAttribute("hidden");
+  dashboardSection?.classList.add("is-expanded");
+  openModal(dashboardModal);
+});
+openImportModalButton?.addEventListener("click", () => openModal(importModal));
+closeDashboardModalButton?.addEventListener("click", () => closeModal(dashboardModal));
+closeImportModalButton?.addEventListener("click", () => closeModal(importModal));
+document.querySelectorAll("[data-modal-close='dashboard']").forEach((element) => {
+  element.addEventListener("click", () => closeModal(dashboardModal));
+});
+document.querySelectorAll("[data-modal-close='import']").forEach((element) => {
+  element.addEventListener("click", () => closeModal(importModal));
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") {
+    return;
+  }
+  closeModal(dashboardModal);
+  closeModal(importModal);
+});
 subjectViewButtons.global.Mate.addEventListener("click", () => setSubjectView("practice", "Mate"));
 subjectViewButtons.global.Fisica.addEventListener("click", () => setSubjectView("practice", "Fisica"));
 subjectViewButtons.exam.Mate.addEventListener("click", () => setSubjectView("exam", "Mate"));
@@ -2121,6 +2263,8 @@ document.getElementById("date").valueAsDate = new Date();
 document.getElementById("examDate").valueAsDate = new Date();
 syncEbauInputsForSubject();
 setExamWeakBlockOptions("", "");
+setExerciseEditMode(false);
+setExamEditMode(false);
 setMode("practice");
 setSubjectView("practice", "Mate");
 
