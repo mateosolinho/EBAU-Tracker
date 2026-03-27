@@ -70,6 +70,9 @@ const importExamButton = document.getElementById("import-exam-btn");
 const examImportFileInput = document.getElementById("exam-import-file");
 const pdfRegistryList = document.getElementById("pdf-registry-list");
 const pdfRegistryFeedback = document.getElementById("pdf-registry-feedback");
+const historyLinkedBanner = document.getElementById("history-linked-banner");
+const historyLinkedText = document.getElementById("history-linked-text");
+const clearHistoryLinkedButton = document.getElementById("clear-history-linked");
 const dashboardToggle = document.getElementById("dashboard-toggle");
 const dashboardContent = document.getElementById("dashboard-content");
 const dashboardSection = document.getElementById("practice-dashboard-card");
@@ -90,6 +93,9 @@ const resultLabel = {
   warn: "⚠️ Duda parcial",
   pending: "⏳ Pendiente",
 };
+
+let historyLinkedPdfFilter = "";
+let historyLinkedPdfName = "";
 
 const SUBJECT_KEYWORDS = {
   Mate: [
@@ -1224,6 +1230,7 @@ function applyFilters(exercises) {
 
   return exercises
     .filter((ex) => ex.subject === viewState.practiceSubject)
+    .filter((ex) => (historyLinkedPdfFilter ? ex.sourcePdfId === historyLinkedPdfFilter : true))
     .filter((ex) => {
       if (!blockText) {
         return true;
@@ -1237,6 +1244,24 @@ function applyFilters(exercises) {
     .filter((ex) => (to ? ex.date <= to : true))
     .filter((ex) => (onlyErrors ? ex.result !== "ok" : true))
     .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
+}
+
+function openLinkedExercisesForExam(exam) {
+  if (!exam?.examPdfId) {
+    examFeedback.textContent = "Este examen no tiene PDF asociado.";
+    return;
+  }
+
+  historyLinkedPdfFilter = exam.examPdfId;
+  historyLinkedPdfName = exam.examPdfName || "PDF asociado";
+  setMode("practice");
+  setSubjectView("practice", exam.subject || viewState.practiceSubject);
+}
+
+function clearLinkedHistoryFilter() {
+  historyLinkedPdfFilter = "";
+  historyLinkedPdfName = "";
+  render();
 }
 
 function appendStrongParagraph(container, label, value) {
@@ -1382,6 +1407,14 @@ function renderHistory(exercises) {
   const filtered = applyFilters(exercises);
   historyList.innerHTML = "";
 
+  if (historyLinkedPdfFilter) {
+    historyLinkedBanner.classList.remove("hidden");
+    historyLinkedText.textContent = `Mostrando ejercicios del PDF: ${historyLinkedPdfName}`;
+  } else {
+    historyLinkedBanner.classList.add("hidden");
+    historyLinkedText.textContent = "";
+  }
+
   if (!filtered.length) {
     const empty = document.createElement("p");
     empty.textContent = "No hay ejercicios para esos filtros.";
@@ -1519,6 +1552,11 @@ function renderExamHistory(exams) {
 
     const actions = document.createElement("div");
     actions.className = "item-actions";
+    if (exam.examPdfId) {
+      actions.append(
+        createItemActionButton("Ver ejercicios", "edit", () => openLinkedExercisesForExam(exam))
+      );
+    }
     actions.append(
       createItemActionButton("Editar", "edit", () => editExamById(exam.id)),
       createItemActionButton("Borrar", "delete", () => deleteExamById(exam.id))
@@ -2051,6 +2089,7 @@ exportExamsJsonFisicaButton.addEventListener("click", () => exportSubjectExamsJs
 importExamButton.addEventListener("click", () => {
   importExamFileAsExercises();
 });
+clearHistoryLinkedButton.addEventListener("click", clearLinkedHistoryFilter);
 subjectInput.addEventListener("change", () => {
   setSubjectView("practice", subjectInput.value);
 });
