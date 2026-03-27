@@ -1669,7 +1669,7 @@ function updatePracticeActionsLabel() {
   if (!exportJsonCurrentButton) {
     return;
   }
-  exportJsonCurrentButton.textContent = `Exportar ${viewState.practiceSubject} (full)`;
+  exportJsonCurrentButton.textContent = `Exportar ${viewState.practiceSubject}`;
 }
 
 function exportExamsJson() {
