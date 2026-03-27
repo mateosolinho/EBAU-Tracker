@@ -180,22 +180,31 @@
             <ul id="weak-topics" class="list"></ul>
           </article>
         </div>
+      </section>
 
-        <article class="coach-box">
-          <h3>Entrenador de nota</h3>
-          <p id="priority-message" class="coach-priority">Cargando prioridad...</p>
-          <p id="priority-confidence" class="coach-subtle">Confianza de prioridad: pendiente</p>
-          <ul id="focus-plan" class="list"></ul>
-          <h4>Reglas para repasar hoy</h4>
-          <ul id="rules-review" class="list"></ul>
-        </article>
+      <section class="card reveal mode-panel" data-mode="practice" aria-labelledby="coach-title">
+        <button id="coach-toggle" class="coach-header" type="button" aria-expanded="false">
+          <h2 id="coach-title">Coach Estratégico</h2>
+          <span class="toggle-icon">▼</span>
+        </button>
 
-        <article class="coach-box">
-          <h3>Preparacion ponderada por asignatura</h3>
-          <p id="ebau-score" class="coach-priority">Indice ponderado: 0%</p>
-          <p id="ebau-priority" class="coach-priority">Prioridad ROI: pendiente</p>
-          <ul id="ebau-breakdown" class="list"></ul>
-        </article>
+        <div id="coach-content" class="coach-content" hidden>
+          <article class="coach-box">
+            <h3>Entrenador de nota</h3>
+            <p id="priority-message" class="coach-priority">Cargando prioridad...</p>
+            <p id="priority-confidence" class="coach-subtle">Confianza de prioridad: pendiente</p>
+            <ul id="focus-plan" class="list"></ul>
+            <h4>Reglas para repasar hoy</h4>
+            <ul id="rules-review" class="list"></ul>
+          </article>
+
+          <article class="coach-box">
+            <h3>Preparacion ponderada por asignatura</h3>
+            <p id="ebau-score" class="coach-priority">Indice ponderado: 0%</p>
+            <p id="ebau-priority" class="coach-priority">Prioridad ROI: pendiente</p>
+            <ul id="ebau-breakdown" class="list"></ul>
+          </article>
+        </div>
       </section>
 
       <section class="card reveal mode-panel" data-mode="practice" aria-labelledby="history-title">

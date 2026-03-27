@@ -62,6 +62,8 @@ const outputs = {
 const exportJsonButton = document.getElementById("export-json");
 const exportExamsJsonButton = document.getElementById("export-exams-json");
 const clearDataButton = document.getElementById("clear-data");
+const coachToggle = document.getElementById("coach-toggle");
+const coachContent = document.getElementById("coach-content");
 const subjectInput = document.getElementById("subject");
 const ebauBlockInput = document.getElementById("ebauBlock");
 const ebauSubtypeInput = document.getElementById("ebauSubtype");
@@ -1289,4 +1291,11 @@ setExamWeakBlockOptions("", "");
 setMode("practice");
 setSubjectView("practice", "Mate");
 setSubjectView("exam", "Mate");
+
+coachToggle.addEventListener("click", () => {
+  const isExpanded = coachToggle.getAttribute("aria-expanded") === "true";
+  coachToggle.setAttribute("aria-expanded", String(!isExpanded));
+  coachContent.toggleAttribute("hidden");
+});
+
 render();
