@@ -1469,6 +1469,8 @@ function buildSubjectExerciseSnapshot(subject, exercises) {
       confidenceLevel: exercise.confidenceLevel || "",
       recognitionSpeed: exercise.recognitionSpeed || "",
       exactEbauType: exercise.exactEbauType || "",
+      importedFromExam: Boolean(exercise.importedFromExam),
+      sourceQuestion: exercise.sourceQuestion || "",
       learnedRule: exercise.learnedRule || "",
     }));
 
@@ -1609,6 +1611,7 @@ function buildAiExportPayload(exercises, exams, scope, subjectScope = "all") {
         ok: "resuelto con acierto",
         warn: "resuelto con dudas o parcial",
         fail: "fallado",
+        pending: "pendiente de resolver (importado o no intentado)",
       },
       coachingIntent:
         "Generar plan semanal, prioridades de bloque, correcciones tacticas y ejercicios recomendados.",
