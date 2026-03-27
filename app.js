@@ -20,6 +20,10 @@ const modeButtons = {
 const modePanels = document.querySelectorAll(".mode-panel");
 
 const subjectViewButtons = {
+  global: {
+    Mate: document.getElementById("global-subject-mate"),
+    Fisica: document.getElementById("global-subject-fisica"),
+  },
   practice: {
     Mate: document.getElementById("practice-view-mate"),
     Fisica: document.getElementById("practice-view-fisica"),
@@ -66,7 +70,6 @@ const outputs = {
 const exportJsonCurrentButton = document.getElementById("export-json-current");
 const exportExamsJsonMateButton = document.getElementById("export-exams-json-mate");
 const exportExamsJsonFisicaButton = document.getElementById("export-exams-json-fisica");
-const clearDataButton = document.getElementById("clear-data");
 const importExamButton = document.getElementById("import-exam-btn");
 const examImportFileInput = document.getElementById("exam-import-file");
 const dashboardToggle = document.getElementById("dashboard-toggle");
@@ -1334,24 +1337,38 @@ function renderExamHistory(exams) {
 }
 
 function setSubjectView(mode, subject) {
-  if (mode === "practice") {
-    viewState.practiceSubject = subject;
-    subjectViewButtons.practice.Mate.classList.toggle("active", subject === "Mate");
-    subjectViewButtons.practice.Fisica.classList.toggle("active", subject === "Fisica");
-    subjectViewButtons.history.Mate.classList.toggle("active", subject === "Mate");
-    subjectViewButtons.history.Fisica.classList.toggle("active", subject === "Fisica");
-    subjectViewButtons.practice.Mate.setAttribute("aria-selected", subject === "Mate" ? "true" : "false");
-    subjectViewButtons.practice.Fisica.setAttribute("aria-selected", subject === "Fisica" ? "true" : "false");
-    subjectViewButtons.history.Mate.setAttribute("aria-selected", subject === "Mate" ? "true" : "false");
-    subjectViewButtons.history.Fisica.setAttribute("aria-selected", subject === "Fisica" ? "true" : "false");
+  const globalSubject = subject === "Fisica" ? "Fisica" : "Mate";
+  viewState.practiceSubject = globalSubject;
+  viewState.examSubject = globalSubject;
+
+  const groups = [
+    subjectViewButtons.global,
+    subjectViewButtons.practice,
+    subjectViewButtons.history,
+    subjectViewButtons.exam,
+  ];
+
+  for (const group of groups) {
+    if (!group) {
+      continue;
+    }
+    for (const [name, button] of Object.entries(group)) {
+      const isActive = name === globalSubject;
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-selected", isActive ? "true" : "false");
+    }
   }
 
-  if (mode === "exam") {
-    viewState.examSubject = subject;
-    subjectViewButtons.exam.Mate.classList.toggle("active", subject === "Mate");
-    subjectViewButtons.exam.Fisica.classList.toggle("active", subject === "Fisica");
-    subjectViewButtons.exam.Mate.setAttribute("aria-selected", subject === "Mate" ? "true" : "false");
-    subjectViewButtons.exam.Fisica.setAttribute("aria-selected", subject === "Fisica" ? "true" : "false");
+  if (subjectInput.value !== globalSubject) {
+    subjectInput.value = globalSubject;
+    syncEbauInputsForSubject();
+  }
+
+  if (examSubjectInput.value !== globalSubject) {
+    examSubjectInput.value = globalSubject;
+    setExamWeakBlockOptions(globalSubject, "");
+  } else {
+    setExamWeakBlockOptions(globalSubject, examWeakBlockInput.value);
   }
 
   render();
@@ -1803,16 +1820,19 @@ exportExamsJsonFisicaButton.addEventListener("click", () => exportSubjectExamsJs
 importExamButton.addEventListener("click", () => {
   importExamFileAsExercises();
 });
-clearDataButton.addEventListener("click", clearData);
-subjectInput.addEventListener("change", syncEbauInputsForSubject);
+subjectInput.addEventListener("change", () => {
+  setSubjectView("practice", subjectInput.value);
+});
 examSubjectInput.addEventListener("change", () => {
-  setExamWeakBlockOptions(examSubjectInput.value);
+  setSubjectView("exam", examSubjectInput.value);
 });
 ebauBlockInput.addEventListener("change", () => {
   setSubtypeOptionsForBlock(ebauBlockInput.value);
 });
 modeButtons.practice.addEventListener("click", () => setMode("practice"));
 modeButtons.exam.addEventListener("click", () => setMode("exam"));
+subjectViewButtons.global.Mate.addEventListener("click", () => setSubjectView("practice", "Mate"));
+subjectViewButtons.global.Fisica.addEventListener("click", () => setSubjectView("practice", "Fisica"));
 subjectViewButtons.practice.Mate.addEventListener("click", () => setSubjectView("practice", "Mate"));
 subjectViewButtons.practice.Fisica.addEventListener("click", () => setSubjectView("practice", "Fisica"));
 subjectViewButtons.history.Mate.addEventListener("click", () => setSubjectView("practice", "Mate"));
@@ -1837,7 +1857,6 @@ syncEbauInputsForSubject();
 setExamWeakBlockOptions("", "");
 setMode("practice");
 setSubjectView("practice", "Mate");
-setSubjectView("exam", "Mate");
 
 coachToggle.addEventListener("click", () => {
   const isExpanded = coachToggle.getAttribute("aria-expanded") === "true";

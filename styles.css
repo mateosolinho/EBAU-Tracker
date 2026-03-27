@@ -716,6 +716,16 @@ select:focus {
   gap: 6px;
 }
 
+.global-subject-switch {
+  margin-top: 10px;
+}
+
+.global-subject-switch .subject-btn {
+  min-height: 34px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+
 .subject-switch.compact .subject-btn {
   min-height: 34px;
   padding: 5px 10px;
@@ -751,6 +761,25 @@ select:focus {
 .import-actions {
   margin-top: 10px;
   margin-bottom: 0;
+}
+
+.filters-panel {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #0f1825;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+
+.filters-panel summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.85rem;
+  user-select: none;
+}
+
+.filters-panel .filters {
+  margin-top: 10px;
 }
 
 @media (max-width: 768px) {

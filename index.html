@@ -31,6 +31,14 @@
             Modo examenes completos
           </button>
         </div>
+        <div class="subject-switch compact global-subject-switch" role="tablist" aria-label="Asignatura global">
+          <button id="global-subject-mate" class="subject-btn active" type="button" role="tab" aria-selected="true">
+            Mate (global)
+          </button>
+          <button id="global-subject-fisica" class="subject-btn" type="button" role="tab" aria-selected="false">
+            Fisica (global)
+          </button>
+        </div>
       </header>
 
       <section
@@ -300,7 +308,6 @@
 
           <div class="history-actions compact">
             <button id="export-json-current" class="ghost-btn" type="button">Exportar asignatura actual</button>
-            <button id="clear-data" class="ghost-btn danger" type="button">Borrar</button>
           </div>
         </div>
 
@@ -312,37 +319,40 @@
           </div>
         </details>
 
-        <form id="filters" class="filters">
-          <label>
-            Bloque oficial
-            <input id="filter-block" type="text" placeholder="Filtrar por bloque" />
-          </label>
+        <details class="filters-panel">
+          <summary>Filtros del historial</summary>
+          <form id="filters" class="filters">
+            <label>
+              Bloque oficial
+              <input id="filter-block" type="text" placeholder="Filtrar por bloque" />
+            </label>
 
-          <label>
-            Resultado
-            <select id="filter-result">
-              <option value="">Todos</option>
-              <option value="ok">✔ Acierto</option>
-              <option value="fail">❌ Fallo</option>
-              <option value="warn">⚠️ Duda parcial</option>
-            </select>
-          </label>
+            <label>
+              Resultado
+              <select id="filter-result">
+                <option value="">Todos</option>
+                <option value="ok">✔ Acierto</option>
+                <option value="fail">❌ Fallo</option>
+                <option value="warn">⚠️ Duda parcial</option>
+              </select>
+            </label>
 
-          <label>
-            Desde
-            <input id="filter-from" type="date" />
-          </label>
+            <label>
+              Desde
+              <input id="filter-from" type="date" />
+            </label>
 
-          <label>
-            Hasta
-            <input id="filter-to" type="date" />
-          </label>
+            <label>
+              Hasta
+              <input id="filter-to" type="date" />
+            </label>
 
-          <label class="checkbox-wrap">
-            <input id="filter-only-errors" type="checkbox" />
-            Solo ejercicios con error
-          </label>
-        </form>
+            <label class="checkbox-wrap">
+              <input id="filter-only-errors" type="checkbox" />
+              Solo ejercicios con error
+            </label>
+          </form>
+        </details>
 
         <div id="history-list" class="history-list"></div>
       </section>
