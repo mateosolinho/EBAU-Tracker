@@ -76,16 +76,12 @@ p {
   order: 1;
 }
 
-#practice-coach-card {
+#practice-add-card {
   order: 2;
 }
 
-#practice-add-card {
-  order: 3;
-}
-
 #practice-history-card {
-  order: 4;
+  order: 3;
 }
 
 @media (max-width: 768px) {
