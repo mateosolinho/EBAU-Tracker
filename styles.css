@@ -873,11 +873,12 @@ select:focus {
 }
 
 .history-item {
-  background: #101926;
+  background: linear-gradient(155deg, #101b2a, #0f1724);
   border: 1px solid var(--border);
   border-left: 6px solid #b8c2cd;
   border-radius: 12px;
-  padding: 10px;
+  padding: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 .history-item.ok {
@@ -892,6 +893,47 @@ select:focus {
   border-left-color: var(--warn);
 }
 
+.history-item.pending {
+  border-left-color: #7aa2c4;
+}
+
+.history-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.item-actions {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.item-action-btn {
+  border: 1px solid var(--border);
+  background: #132233;
+  color: var(--text);
+  border-radius: 8px;
+  min-height: 30px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.item-action-btn.edit {
+  color: #8ee8db;
+}
+
+.item-action-btn.delete {
+  color: #ff9a9a;
+}
+
+.item-action-btn:hover {
+  border-color: rgba(157, 176, 195, 0.35);
+}
+
 .history-meta {
   display: flex;
   flex-wrap: wrap;
@@ -902,8 +944,15 @@ select:focus {
 }
 
 .history-title {
-  margin: 0 0 6px;
-  font-size: 1rem;
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.3;
+}
+
+.history-detail {
+  margin: 5px 0 0;
+  font-size: 0.88rem;
+  color: #c7d5e4;
 }
 
 .badge {
@@ -912,6 +961,21 @@ select:focus {
   background: #172536;
   font-size: 0.78rem;
   font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .history-item-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .item-actions {
+    justify-content: flex-end;
+  }
+
+  .item-action-btn {
+    flex: 1;
+  }
 }
 
 .reveal {

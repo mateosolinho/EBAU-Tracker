@@ -1022,10 +1022,141 @@ function applyFilters(exercises) {
 
 function appendStrongParagraph(container, label, value) {
   const paragraph = document.createElement("p");
+  paragraph.className = "history-detail";
   const strong = document.createElement("strong");
   strong.textContent = `${label}: `;
   paragraph.append(strong, value);
   container.appendChild(paragraph);
+}
+
+function createItemActionButton(label, className, onClick) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `item-action-btn ${className}`;
+  button.textContent = label;
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+function deleteExerciseById(id) {
+  const shouldDelete = window.confirm("¿Seguro que quieres borrar este ejercicio?");
+  if (!shouldDelete) {
+    return;
+  }
+
+  const exercises = readExercises().filter((exercise) => exercise.id !== id);
+  writeExercises(exercises);
+  feedback.textContent = "Ejercicio eliminado.";
+  render();
+}
+
+function editExerciseById(id) {
+  const exercises = readExercises();
+  const index = exercises.findIndex((exercise) => exercise.id === id);
+  if (index < 0) {
+    return;
+  }
+
+  const current = exercises[index];
+  const result = window
+    .prompt("Resultado (ok, fail, warn, pending)", current.result || "pending")
+    ?.trim()
+    .toLowerCase();
+  if (!result) {
+    return;
+  }
+
+  if (!["ok", "fail", "warn", "pending"].includes(result)) {
+    feedback.textContent = "Resultado invalido. Usa: ok, fail, warn o pending.";
+    return;
+  }
+
+  const minutesText = window.prompt(
+    "Tiempo en minutos (0-300)",
+    String(current.minutes ?? 0)
+  );
+  if (minutesText === null) {
+    return;
+  }
+  const minutes = Number(minutesText);
+  if (!Number.isFinite(minutes) || minutes < 0 || minutes > 300) {
+    feedback.textContent = "Tiempo invalido.";
+    return;
+  }
+
+  const mainError = window.prompt("Error principal", current.mainError || "")?.trim();
+  if (mainError === null || !mainError) {
+    return;
+  }
+
+  const learnedRule = window.prompt("Regla aprendida", current.learnedRule || "") ?? "";
+
+  exercises[index] = {
+    ...current,
+    result,
+    minutes,
+    mainError,
+    learnedRule: learnedRule.trim(),
+  };
+
+  writeExercises(exercises);
+  feedback.textContent = "Ejercicio actualizado.";
+  render();
+}
+
+function deleteExamById(id) {
+  const shouldDelete = window.confirm("¿Seguro que quieres borrar este examen?");
+  if (!shouldDelete) {
+    return;
+  }
+
+  const exams = readExams().filter((exam) => exam.id !== id);
+  writeExams(exams);
+  examFeedback.textContent = "Examen eliminado.";
+  render();
+}
+
+function editExamById(id) {
+  const exams = readExams();
+  const index = exams.findIndex((exam) => exam.id === id);
+  if (index < 0) {
+    return;
+  }
+
+  const current = exams[index];
+  const scoreText = window.prompt("Nota (0-10)", String(current.score ?? ""));
+  if (scoreText === null) {
+    return;
+  }
+  const score = Number(scoreText);
+  if (!Number.isFinite(score) || score < 0 || score > 10) {
+    examFeedback.textContent = "Nota invalida.";
+    return;
+  }
+
+  const weakBlock = window.prompt("Bloque mas flojo", current.weakBlock || "")?.trim();
+  if (weakBlock === null || !weakBlock) {
+    return;
+  }
+
+  const mainError = window.prompt("Error dominante", current.mainError || "")?.trim();
+  if (mainError === null || !mainError) {
+    return;
+  }
+
+  const actionPlan = window.prompt("Plan de accion", current.actionPlan || "") ?? "";
+
+  exams[index] = {
+    ...current,
+    score,
+    weakBlock,
+    mainError,
+    actionPlan: actionPlan.trim(),
+  };
+
+  writeExams(exams);
+  examFeedback.textContent = "Examen actualizado.";
+  render();
 }
 
 function renderHistory(exercises) {
@@ -1042,6 +1173,24 @@ function renderHistory(exercises) {
   for (const ex of filtered) {
     const item = document.createElement("article");
     item.className = `history-item ${ex.result || "pending"}`;
+
+    const topRow = document.createElement("div");
+    topRow.className = "history-item-top";
+
+    const title = document.createElement("h4");
+    title.className = "history-title";
+    const blockLabel = ex.ebauBlock || "Sin bloque oficial";
+    const subtypeLabel = ex.ebauSubtype ? ` / ${ex.ebauSubtype}` : "";
+    title.textContent = `${blockLabel}${subtypeLabel} - ${resultLabel[ex.result] || "⏳ Pendiente"}`;
+
+    const actions = document.createElement("div");
+    actions.className = "item-actions";
+    actions.append(
+      createItemActionButton("Editar", "edit", () => editExerciseById(ex.id)),
+      createItemActionButton("Borrar", "delete", () => deleteExerciseById(ex.id))
+    );
+
+    topRow.append(title, actions);
 
     const meta = document.createElement("div");
     meta.className = "history-meta";
@@ -1066,13 +1215,7 @@ function renderHistory(exercises) {
 
     meta.append(dateBadge, subject, type, ebau, time);
 
-    const title = document.createElement("h4");
-    title.className = "history-title";
-    const blockLabel = ex.ebauBlock || "Sin bloque oficial";
-    const subtypeLabel = ex.ebauSubtype ? ` / ${ex.ebauSubtype}` : "";
-    title.textContent = `${blockLabel}${subtypeLabel} - ${resultLabel[ex.result]}`;
-
-    item.append(meta, title);
+    item.append(topRow, meta);
     appendStrongParagraph(item, "Error", ex.mainError);
     appendStrongParagraph(item, "Fase", ex.errorPhase || "-");
     appendStrongParagraph(
@@ -1147,6 +1290,22 @@ function renderExamHistory(exams) {
     const item = document.createElement("article");
     item.className = "history-item";
 
+    const topRow = document.createElement("div");
+    topRow.className = "history-item-top";
+
+    const title = document.createElement("h4");
+    title.className = "history-title";
+    title.textContent = `Nota ${exam.score.toFixed(2)} / 10`;
+
+    const actions = document.createElement("div");
+    actions.className = "item-actions";
+    actions.append(
+      createItemActionButton("Editar", "edit", () => editExamById(exam.id)),
+      createItemActionButton("Borrar", "delete", () => deleteExamById(exam.id))
+    );
+
+    topRow.append(title, actions);
+
     const meta = document.createElement("div");
     meta.className = "history-meta";
 
@@ -1165,11 +1324,7 @@ function renderExamHistory(exams) {
 
     meta.append(dateBadge, subject, examType, minutes);
 
-    const title = document.createElement("h4");
-    title.className = "history-title";
-    title.textContent = `Nota ${exam.score.toFixed(2)} / 10`;
-
-    item.append(meta, title);
+    item.append(topRow, meta);
     appendStrongParagraph(item, "Bloque flojo", exam.weakBlock || "-");
     appendStrongParagraph(item, "Error dominante", exam.mainError);
     appendStrongParagraph(item, "Plan accion", exam.actionPlan || "-");
