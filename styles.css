@@ -775,6 +775,50 @@ select:focus {
   margin-bottom: 0;
 }
 
+.pdf-registry {
+  margin-top: 10px;
+}
+
+.pdf-registry h3 {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+}
+
+.pdf-registry-list {
+  display: grid;
+  gap: 8px;
+}
+
+.pdf-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #111d2c;
+  padding: 8px;
+}
+
+.pdf-item-title {
+  margin: 0 0 4px;
+  font-size: 0.88rem;
+  word-break: break-word;
+}
+
+.pdf-item-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.pdf-item-actions {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+}
+
+.pdf-item-actions .item-action-btn {
+  min-height: 28px;
+  font-size: 0.75rem;
+}
+
 .filters-panel {
   border: 1px solid var(--border);
   border-radius: 10px;

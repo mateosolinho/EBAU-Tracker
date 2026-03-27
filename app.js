@@ -2,6 +2,8 @@ const STORAGE_KEY = "ebau-tracker-exercises";
 const EXAMS_STORAGE_KEY = "ebau-tracker-exams";
 const TARGETS_STORAGE_KEY = "ebau-tracker-target-scores";
 const MIN_ATTEMPTS_FOR_CONFIDENCE = 3;
+const PDF_DB_NAME = "ebau-tracker-pdf-registry";
+const PDF_STORE_NAME = "pdf-files";
 
 const form = document.getElementById("exercise-form");
 const feedback = document.getElementById("form-feedback");
@@ -64,6 +66,8 @@ const exportExamsJsonMateButton = document.getElementById("export-exams-json-mat
 const exportExamsJsonFisicaButton = document.getElementById("export-exams-json-fisica");
 const importExamButton = document.getElementById("import-exam-btn");
 const examImportFileInput = document.getElementById("exam-import-file");
+const pdfRegistryList = document.getElementById("pdf-registry-list");
+const pdfRegistryFeedback = document.getElementById("pdf-registry-feedback");
 const dashboardToggle = document.getElementById("dashboard-toggle");
 const dashboardContent = document.getElementById("dashboard-content");
 const dashboardSection = document.getElementById("practice-dashboard-card");
@@ -382,6 +386,168 @@ function buildExercise(formData) {
     learnedRule,
     createdAt: Date.now(),
   };
+}
+
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return "0 KB";
+  }
+  const units = ["B", "KB", "MB", "GB"];
+  let size = bytes;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+  return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function openPdfRegistryDb() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(PDF_DB_NAME, 1);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(PDF_STORE_NAME)) {
+        db.createObjectStore(PDF_STORE_NAME, { keyPath: "id" });
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function completeTransaction(transaction) {
+  return new Promise((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error || new Error("Transaccion abortada"));
+  });
+}
+
+async function getStoredPdfs() {
+  const db = await openPdfRegistryDb();
+  try {
+    const transaction = db.transaction(PDF_STORE_NAME, "readonly");
+    const store = transaction.objectStore(PDF_STORE_NAME);
+    const request = store.getAll();
+    const records = await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+    await completeTransaction(transaction);
+    return records.sort((a, b) => b.uploadedAt - a.uploadedAt);
+  } finally {
+    db.close();
+  }
+}
+
+async function savePdfRecord(file) {
+  if (!file || !file.name.toLowerCase().endsWith(".pdf")) {
+    return false;
+  }
+
+  const db = await openPdfRegistryDb();
+  try {
+    const transaction = db.transaction(PDF_STORE_NAME, "readwrite");
+    const store = transaction.objectStore(PDF_STORE_NAME);
+    store.put({
+      id: crypto.randomUUID(),
+      name: file.name,
+      type: file.type || "application/pdf",
+      size: file.size,
+      uploadedAt: Date.now(),
+      fileBlob: file,
+    });
+    await completeTransaction(transaction);
+    return true;
+  } finally {
+    db.close();
+  }
+}
+
+async function deletePdfRecord(id) {
+  const db = await openPdfRegistryDb();
+  try {
+    const transaction = db.transaction(PDF_STORE_NAME, "readwrite");
+    transaction.objectStore(PDF_STORE_NAME).delete(id);
+    await completeTransaction(transaction);
+  } finally {
+    db.close();
+  }
+}
+
+function downloadPdfRecord(record) {
+  if (!record?.fileBlob) {
+    return;
+  }
+  const blob = new Blob([record.fileBlob], { type: record.type || "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = record.name || "examen.pdf";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+async function renderPdfRegistry() {
+  if (!pdfRegistryList) {
+    return;
+  }
+  pdfRegistryList.innerHTML = "";
+
+  try {
+    const records = await getStoredPdfs();
+    if (!records.length) {
+      const empty = document.createElement("p");
+      empty.className = "pdf-item-meta";
+      empty.textContent = "Todavia no hay PDFs guardados.";
+      pdfRegistryList.appendChild(empty);
+      return;
+    }
+
+    for (const record of records) {
+      const item = document.createElement("article");
+      item.className = "pdf-item";
+
+      const title = document.createElement("h4");
+      title.className = "pdf-item-title";
+      title.textContent = record.name;
+
+      const meta = document.createElement("p");
+      meta.className = "pdf-item-meta";
+      const dateText = new Date(record.uploadedAt).toLocaleString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      meta.textContent = `${formatBytes(record.size)} • ${dateText}`;
+
+      const actions = document.createElement("div");
+      actions.className = "pdf-item-actions";
+      actions.append(
+        createItemActionButton("Descargar", "edit", () => downloadPdfRecord(record)),
+        createItemActionButton("Borrar", "delete", async () => {
+          const shouldDelete = window.confirm(`¿Borrar PDF ${record.name}?`);
+          if (!shouldDelete) {
+            return;
+          }
+          await deletePdfRecord(record.id);
+          pdfRegistryFeedback.textContent = "PDF eliminado del registro.";
+          renderPdfRegistry();
+        })
+      );
+
+      item.append(title, meta, actions);
+      pdfRegistryList.appendChild(item);
+    }
+  } catch {
+    const error = document.createElement("p");
+    error.className = "pdf-item-meta";
+    error.textContent = "No se pudo cargar el registro de PDFs.";
+    pdfRegistryList.appendChild(error);
+  }
 }
 
 function normalizeText(text) {
@@ -1528,10 +1694,16 @@ async function importExamFileAsExercises() {
     exercises.push(...importedExercises);
     writeExercises(exercises);
 
+    const wasPdfSaved = await savePdfRecord(file);
+
     feedback.textContent =
       `Importados ${importedExercises.length} ejercicios como pendientes. ` +
       "No afectan metricas hasta que registres resultado real.";
+    pdfRegistryFeedback.textContent = wasPdfSaved
+      ? "PDF guardado en el registro local."
+      : "Archivo importado (solo se registran PDFs).";
     examImportFileInput.value = "";
+    renderPdfRegistry();
     render();
   } catch (error) {
     feedback.textContent = `No se pudo importar el examen: ${error.message || "error inesperado"}.`;
@@ -1849,5 +2021,7 @@ dashboardToggle.addEventListener("click", () => {
   dashboardContent.toggleAttribute("hidden");
   dashboardSection.classList.toggle("is-expanded", !isExpanded);
 });
+
+renderPdfRegistry();
 
 render();
