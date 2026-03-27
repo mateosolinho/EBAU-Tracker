@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EBAU Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape shape-a"></div>
+    <div class="bg-shape shape-b"></div>
+
+    <main class="app-shell">
+      <header class="hero reveal">
+        <p class="eyebrow">Preparacion inteligente</p>
+        <h1>EBAU Tracker</h1>
+        <p>
+          Registra ejercicios, detecta patrones de error y mejora nota mas rapido.
+        </p>
+        <div class="mode-switch" role="tablist" aria-label="Seleccion de modo">
+          <button id="mode-practice" class="mode-btn active" type="button" role="tab" aria-selected="true">
+            Modo ejercicios
+          </button>
+          <button id="mode-exam" class="mode-btn" type="button" role="tab" aria-selected="false">
+            Modo examenes completos
+          </button>
+        </div>
+      </header>
+
+      <section class="card reveal mode-panel" data-mode="practice" aria-labelledby="add-exercise-title">
+        <div class="card-title-row">
+          <h2 id="add-exercise-title">Anadir ejercicio</h2>
+          <span class="pill">MVP</span>
+        </div>
+
+        <form id="exercise-form" class="grid-form">
+          <label>
+            Fecha
+            <input type="date" id="date" name="date" required />
+          </label>
+
+          <label>
+            Asignatura
+            <select id="subject" name="subject" required>
+              <option value="">Selecciona</option>
+              <option value="Mate">Mate</option>
+              <option value="Fisica">Fisica</option>
+            </select>
+          </label>
+
+          <label>
+            Tipo de ejercicio
+            <select id="exerciseType" name="exerciseType" required>
+              <option value="">Selecciona</option>
+              <option>Problema largo</option>
+              <option>Test rapido</option>
+              <option>Desarrollo corto</option>
+              <option>Demostracion</option>
+              <option>Calculo basico</option>
+            </select>
+          </label>
+
+          <label>
+            Bloque oficial
+            <select id="ebauBlock" name="ebauBlock">
+              <option value="">No aplica</option>
+            </select>
+          </label>
+
+          <label>
+            Subtipo EBAU
+            <select id="ebauSubtype" name="ebauSubtype">
+              <option value="">Selecciona bloque primero</option>
+            </select>
+          </label>
+
+          <label>
+            Resultado
+            <select id="result" name="result" required>
+              <option value="">Selecciona</option>
+              <option value="ok">✔ Acierto</option>
+              <option value="fail">❌ Fallo</option>
+              <option value="warn">⚠️ Duda parcial</option>
+            </select>
+          </label>
+
+          <label>
+            Tiempo (min)
+            <input type="number" id="minutes" name="minutes" min="1" max="300" required />
+          </label>
+
+          <label class="full-width">
+            Error principal
+            <select id="mainError" name="mainError" required>
+              <option value="">Selecciona</option>
+              <option>No identifique el tipo</option>
+              <option>Error de calculo</option>
+              <option>Me bloquee</option>
+              <option>Error de planteamiento</option>
+              <option>Descuidado</option>
+            </select>
+          </label>
+
+          <label class="full-width">
+            Regla aprendida
+            <input
+              type="text"
+              id="learnedRule"
+              name="learnedRule"
+              maxlength="120"
+              placeholder="Ej: Siempre hacer f'=0 primero"
+            />
+          </label>
+
+          <button class="cta full-width" type="submit">Guardar ejercicio</button>
+        </form>
+
+        <p id="form-feedback" class="feedback" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="card reveal mode-panel" data-mode="practice" aria-labelledby="dashboard-title">
+        <div class="card-title-row">
+          <h2 id="dashboard-title">Dashboard</h2>
+          <span class="pill">Patrones</span>
+        </div>
+
+        <div class="subject-switch" role="tablist" aria-label="Vista de asignatura ejercicios">
+          <button id="practice-view-mate" class="subject-btn active" type="button" role="tab" aria-selected="true">
+            Mate
+          </button>
+          <button id="practice-view-fisica" class="subject-btn" type="button" role="tab" aria-selected="false">
+            Fisica
+          </button>
+        </div>
+
+        <div class="stats-grid" id="stats-grid">
+          <article class="stat-box">
+            <h3>% aciertos total</h3>
+            <p id="total-accuracy">0%</p>
+          </article>
+          <article class="stat-box">
+            <h3>Total ejercicios</h3>
+            <p id="total-exercises">0</p>
+          </article>
+          <article class="stat-box">
+            <h3>Tiempo medio</h3>
+            <p id="avg-time">0 min</p>
+          </article>
+          <article class="stat-box">
+            <h3>Acierto 7 dias</h3>
+            <p id="accuracy-7d">0%</p>
+          </article>
+          <article class="stat-box">
+            <h3>Racha estudio</h3>
+            <p id="study-streak">0 dias</p>
+          </article>
+          <article class="stat-box">
+            <h3>Indice riesgo</h3>
+            <p id="risk-index">Bajo</p>
+          </article>
+        </div>
+
+        <div class="insights-grid">
+          <article>
+            <h3>% por bloque</h3>
+            <ul id="topic-accuracy" class="list"></ul>
+          </article>
+          <article>
+            <h3>Errores TOP 3</h3>
+            <ul id="top-errors" class="list"></ul>
+          </article>
+          <article>
+            <h3>Bloques debiles</h3>
+            <ul id="weak-topics" class="list"></ul>
+          </article>
+        </div>
+
+        <article class="coach-box">
+          <h3>Entrenador de nota</h3>
+          <p id="priority-message" class="coach-priority">Cargando prioridad...</p>
+          <p id="priority-confidence" class="coach-subtle">Confianza de prioridad: pendiente</p>
+          <ul id="focus-plan" class="list"></ul>
+          <h4>Reglas para repasar hoy</h4>
+          <ul id="rules-review" class="list"></ul>
+        </article>
+
+        <article class="coach-box">
+          <h3>Preparacion ponderada por asignatura</h3>
+          <p id="ebau-score" class="coach-priority">Indice ponderado: 0%</p>
+          <p id="ebau-priority" class="coach-priority">Prioridad ROI: pendiente</p>
+          <ul id="ebau-breakdown" class="list"></ul>
+        </article>
+      </section>
+
+      <section class="card reveal mode-panel" data-mode="practice" aria-labelledby="history-title">
+        <div class="card-title-row">
+          <h2 id="history-title">Historial</h2>
+          <span class="pill">Filtro rapido</span>
+        </div>
+
+        <div class="history-actions">
+          <button id="export-json" class="ghost-btn" type="button">Exportar JSON</button>
+          <button id="clear-data" class="ghost-btn danger" type="button">Borrar datos</button>
+        </div>
+
+        <form id="filters" class="filters">
+          <label>
+            Bloque oficial
+            <input id="filter-block" type="text" placeholder="Filtrar por bloque" />
+          </label>
+
+          <label>
+            Resultado
+            <select id="filter-result">
+              <option value="">Todos</option>
+              <option value="ok">✔ Acierto</option>
+              <option value="fail">❌ Fallo</option>
+              <option value="warn">⚠️ Duda parcial</option>
+            </select>
+          </label>
+
+          <label>
+            Desde
+            <input id="filter-from" type="date" />
+          </label>
+
+          <label>
+            Hasta
+            <input id="filter-to" type="date" />
+          </label>
+
+          <label class="checkbox-wrap">
+            <input id="filter-only-errors" type="checkbox" />
+            Solo ejercicios con error
+          </label>
+        </form>
+
+        <div id="history-list" class="history-list"></div>
+      </section>
+
+      <section class="card reveal mode-panel hidden" data-mode="exam" aria-labelledby="exam-form-title">
+        <div class="card-title-row">
+          <h2 id="exam-form-title">Registrar examen completo</h2>
+          <span class="pill">Simulacro real</span>
+        </div>
+
+        <form id="exam-form" class="grid-form">
+          <label>
+            Fecha
+            <input type="date" id="examDate" name="examDate" required />
+          </label>
+
+          <label>
+            Asignatura
+            <select id="examSubject" name="examSubject" required>
+              <option value="">Selecciona</option>
+              <option value="Mate">Mate</option>
+              <option value="Fisica">Fisica</option>
+            </select>
+          </label>
+
+          <label>
+            Tipo de examen
+            <select id="examType" name="examType" required>
+              <option value="">Selecciona</option>
+              <option value="Simulacro">Simulacro</option>
+              <option value="Oficial junio">Oficial junio</option>
+              <option value="Oficial julio">Oficial julio</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </label>
+
+          <label>
+            Nota (0-10)
+            <input type="number" id="examScore" name="examScore" min="0" max="10" step="0.01" required />
+          </label>
+
+          <label>
+            Tiempo (min)
+            <input type="number" id="examMinutes" name="examMinutes" min="30" max="240" required />
+          </label>
+
+          <label>
+            Bloque mas flojo
+            <select id="examWeakBlock" name="examWeakBlock" required>
+              <option value="">Selecciona asignatura primero</option>
+            </select>
+          </label>
+
+          <label class="full-width">
+            Error dominante
+            <select id="examMainError" name="examMainError" required>
+              <option value="">Selecciona</option>
+              <option>No identifique el tipo</option>
+              <option>Error de calculo</option>
+              <option>Me bloquee</option>
+              <option>Error de planteamiento</option>
+              <option>Descuidado</option>
+            </select>
+          </label>
+
+          <label class="full-width">
+            Plan accion para el siguiente examen
+            <input
+              type="text"
+              id="examActionPlan"
+              name="examActionPlan"
+              maxlength="140"
+              placeholder="Ej: 2 simulacros esta semana + repaso de dinamica"
+            />
+          </label>
+
+          <button class="cta full-width" type="submit">Guardar intento de examen</button>
+        </form>
+
+        <p id="exam-feedback" class="feedback" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="card reveal mode-panel hidden" data-mode="exam" aria-labelledby="exam-history-title">
+        <div class="card-title-row">
+          <h2 id="exam-history-title">Historial de examenes</h2>
+          <span class="pill">Tendencia</span>
+        </div>
+
+        <div class="subject-switch" role="tablist" aria-label="Vista de asignatura examenes">
+          <button id="exam-view-mate" class="subject-btn active" type="button" role="tab" aria-selected="true">
+            Mate
+          </button>
+          <button id="exam-view-fisica" class="subject-btn" type="button" role="tab" aria-selected="false">
+            Fisica
+          </button>
+        </div>
+
+        <div class="stats-grid">
+          <article class="stat-box">
+            <h3>Nota media</h3>
+            <p id="exam-avg-score">0.00</p>
+          </article>
+          <article class="stat-box">
+            <h3>Mejor nota</h3>
+            <p id="exam-best-score">0.00</p>
+          </article>
+          <article class="stat-box">
+            <h3>Ultimo examen</h3>
+            <p id="exam-last-score">-</p>
+          </article>
+          <article class="stat-box">
+            <h3>Brecha objetivo</h3>
+            <p id="exam-score-gap">-</p>
+          </article>
+        </div>
+
+        <div class="exam-goal-row">
+          <label>
+            Nota objetivo
+            <input id="exam-target-score" type="number" min="0" max="10" step="0.1" placeholder="Ej: 8.5" />
+          </label>
+        </div>
+
+        <div class="history-actions">
+          <button id="export-exams-json" class="ghost-btn" type="button">Exportar intentos</button>
+        </div>
+
+        <div id="exam-history-list" class="history-list"></div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
