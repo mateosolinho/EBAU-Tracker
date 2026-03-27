@@ -59,8 +59,10 @@ const outputs = {
   priorityConfidence: document.getElementById("priority-confidence"),
 };
 
-const exportJsonButton = document.getElementById("export-json");
-const exportExamsJsonButton = document.getElementById("export-exams-json");
+const exportJsonMateButton = document.getElementById("export-json-mate");
+const exportJsonFisicaButton = document.getElementById("export-json-fisica");
+const exportExamsJsonMateButton = document.getElementById("export-exams-json-mate");
+const exportExamsJsonFisicaButton = document.getElementById("export-exams-json-fisica");
 const clearDataButton = document.getElementById("clear-data");
 const coachToggle = document.getElementById("coach-toggle");
 const coachContent = document.getElementById("coach-content");
@@ -1074,20 +1076,31 @@ function buildSubjectExamSnapshot(subject, exams) {
   };
 }
 
-function buildAiExportPayload(exercises, exams, scope) {
+function buildAiExportPayload(exercises, exams, scope, subjectScope = "all") {
   const includeExercises = scope === "full";
   const includeExams = true;
 
-  const exercisesPayload = includeExercises ? exercises : [];
-  const examsPayload = includeExams ? exams : [];
+  const scopedExercises =
+    subjectScope === "all"
+      ? exercises
+      : exercises.filter((exercise) => exercise.subject === subjectScope);
+  const scopedExams =
+    subjectScope === "all" ? exams : exams.filter((exam) => exam.subject === subjectScope);
 
-  const mateExerciseSnapshot = buildSubjectExerciseSnapshot("Mate", exercises);
-  const fisicaExerciseSnapshot = buildSubjectExerciseSnapshot("Fisica", exercises);
-  const mateExamSnapshot = buildSubjectExamSnapshot("Mate", exams);
-  const fisicaExamSnapshot = buildSubjectExamSnapshot("Fisica", exams);
+  const exercisesPayload = includeExercises ? scopedExercises : [];
+  const examsPayload = includeExams ? scopedExams : [];
+
+  const includeMate = subjectScope === "all" || subjectScope === "Mate";
+  const includeFisica = subjectScope === "all" || subjectScope === "Fisica";
+
+  const mateExerciseSnapshot = buildSubjectExerciseSnapshot("Mate", scopedExercises);
+  const fisicaExerciseSnapshot = buildSubjectExerciseSnapshot("Fisica", scopedExercises);
+  const mateExamSnapshot = buildSubjectExamSnapshot("Mate", scopedExams);
+  const fisicaExamSnapshot = buildSubjectExamSnapshot("Fisica", scopedExams);
 
   const payload = {
     exportType: scope,
+    subjectScope,
     schemaVersion: "ai-coach-v1",
     exportedAt: new Date().toISOString(),
     locale: "es-ES",
@@ -1103,12 +1116,12 @@ function buildAiExportPayload(exercises, exams, scope) {
     },
     snapshot: {
       exercisesBySubject: {
-        Mate: includeExercises ? mateExerciseSnapshot : null,
-        Fisica: includeExercises ? fisicaExerciseSnapshot : null,
+        Mate: includeExercises && includeMate ? mateExerciseSnapshot : null,
+        Fisica: includeExercises && includeFisica ? fisicaExerciseSnapshot : null,
       },
       examsBySubject: {
-        Mate: includeExams ? mateExamSnapshot : null,
-        Fisica: includeExams ? fisicaExamSnapshot : null,
+        Mate: includeExams && includeMate ? mateExamSnapshot : null,
+        Fisica: includeExams && includeFisica ? fisicaExamSnapshot : null,
       },
       totals: {
         exercises: exercisesPayload.length,
@@ -1127,34 +1140,50 @@ function buildAiExportPayload(exercises, exams, scope) {
 }
 
 function exportJson() {
+  exportSubjectJson("all");
+}
+
+function exportSubjectJson(subjectScope) {
   const exercises = readExercises();
   const exams = readExams();
-  const payload = buildAiExportPayload(exercises, exams, "full");
+  const payload = buildAiExportPayload(exercises, exams, "full", subjectScope);
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: "application/json",
   });
   const dateStamp = new Date().toISOString().slice(0, 10);
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = `ebau-tracker-ai-full-${dateStamp}.json`;
+  const scopeLabel = subjectScope === "all" ? "all" : subjectScope.toLowerCase();
+  link.download = `ebau-tracker-ai-full-${scopeLabel}-${dateStamp}.json`;
   link.click();
   URL.revokeObjectURL(link.href);
-  feedback.textContent = "Export AI-ready generado (ejercicios + examenes).";
+  feedback.textContent =
+    subjectScope === "all"
+      ? "Export AI-ready generado (ejercicios + examenes)."
+      : `Export AI-ready de ${subjectScope} generado (ejercicios + examenes).`;
 }
 
 function exportExamsJson() {
+  exportSubjectExamsJson("all");
+}
+
+function exportSubjectExamsJson(subjectScope) {
   const exams = readExams();
-  const payload = buildAiExportPayload([], exams, "exams-only");
+  const payload = buildAiExportPayload([], exams, "exams-only", subjectScope);
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: "application/json",
   });
   const dateStamp = new Date().toISOString().slice(0, 10);
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = `ebau-tracker-ai-examenes-${dateStamp}.json`;
+  const scopeLabel = subjectScope === "all" ? "all" : subjectScope.toLowerCase();
+  link.download = `ebau-tracker-ai-examenes-${scopeLabel}-${dateStamp}.json`;
   link.click();
   URL.revokeObjectURL(link.href);
-  examFeedback.textContent = "Export AI-ready de examenes generado.";
+  examFeedback.textContent =
+    subjectScope === "all"
+      ? "Export AI-ready de examenes generado."
+      : `Export AI-ready de examenes de ${subjectScope} generado.`;
 }
 
 function clearData() {
@@ -1256,8 +1285,10 @@ for (const input of Object.values(filters)) {
   input.addEventListener("change", render);
 }
 
-exportJsonButton.addEventListener("click", exportJson);
-exportExamsJsonButton.addEventListener("click", exportExamsJson);
+exportJsonMateButton.addEventListener("click", () => exportSubjectJson("Mate"));
+exportJsonFisicaButton.addEventListener("click", () => exportSubjectJson("Fisica"));
+exportExamsJsonMateButton.addEventListener("click", () => exportSubjectExamsJson("Mate"));
+exportExamsJsonFisicaButton.addEventListener("click", () => exportSubjectExamsJson("Fisica"));
 clearDataButton.addEventListener("click", clearData);
 subjectInput.addEventListener("change", syncEbauInputsForSubject);
 examSubjectInput.addEventListener("change", () => {
