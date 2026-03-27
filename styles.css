@@ -72,6 +72,22 @@ p {
   gap: 14px;
 }
 
+#practice-dashboard-card {
+  order: 1;
+}
+
+#practice-coach-card {
+  order: 2;
+}
+
+#practice-add-card {
+  order: 3;
+}
+
+#practice-history-card {
+  order: 4;
+}
+
 @media (max-width: 768px) {
   .app-shell {
     width: min(100%, 96vw);
@@ -572,6 +588,15 @@ select:focus {
   display: grid;
   gap: 12px;
   animation: slideDown 0.3s ease;
+}
+
+.collapsible-card {
+  padding: 11px 12px;
+  border-radius: 16px;
+}
+
+.collapsible-card.is-expanded {
+  padding: 16px;
 }
 
 .section-content[hidden],

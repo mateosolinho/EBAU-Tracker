@@ -73,6 +73,8 @@ const dashboardToggle = document.getElementById("dashboard-toggle");
 const dashboardContent = document.getElementById("dashboard-content");
 const coachToggle = document.getElementById("coach-toggle");
 const coachContent = document.getElementById("coach-content");
+const dashboardSection = document.getElementById("practice-dashboard-card");
+const coachSection = document.getElementById("practice-coach-card");
 const subjectInput = document.getElementById("subject");
 const ebauBlockInput = document.getElementById("ebauBlock");
 const ebauSubtypeInput = document.getElementById("ebauSubtype");
@@ -1686,12 +1688,14 @@ coachToggle.addEventListener("click", () => {
   const isExpanded = coachToggle.getAttribute("aria-expanded") === "true";
   coachToggle.setAttribute("aria-expanded", String(!isExpanded));
   coachContent.toggleAttribute("hidden");
+  coachSection.classList.toggle("is-expanded", !isExpanded);
 });
 
 dashboardToggle.addEventListener("click", () => {
   const isExpanded = dashboardToggle.getAttribute("aria-expanded") === "true";
   dashboardToggle.setAttribute("aria-expanded", String(!isExpanded));
   dashboardContent.toggleAttribute("hidden");
+  dashboardSection.classList.toggle("is-expanded", !isExpanded);
 });
 
 render();
