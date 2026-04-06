@@ -18,20 +18,8 @@
 
     <main class="app-shell">
       <header class="hero reveal">
-        <p class="eyebrow">Preparacion inteligente</p>
-        <h1>EBAU Tracker</h1>
-        <p>
-          Registra ejercicios, detecta patrones de error y mejora nota mas rapido.
-        </p>
-        <div class="hero-controls">
-          <div class="mode-switch" role="tablist" aria-label="Seleccion de modo">
-            <button id="mode-practice" class="mode-btn active" type="button" role="tab" aria-selected="true">
-              Ejercicios
-            </button>
-            <button id="mode-exam" class="mode-btn" type="button" role="tab" aria-selected="false">
-              Examenes
-            </button>
-          </div>
+        <div class="hero-top">
+          <h1>EBAU Tracker</h1>
           <div class="subject-switch compact global-subject-switch" role="tablist" aria-label="Asignatura global">
             <button id="global-subject-mate" class="subject-btn active" type="button" role="tab" aria-selected="true">
               Mate
@@ -41,8 +29,22 @@
             </button>
           </div>
           <div id="practice-quick-actions" class="header-quick-actions">
-            <button id="open-dashboard-modal" class="ghost-btn" type="button">Abrir dashboard</button>
-            <button id="open-import-modal" class="ghost-btn" type="button">Subir PDF examen</button>
+            <div class="hero-actions-buttons">
+              <button id="open-dashboard-modal" class="ghost-btn primary-ghost" type="button">Abrir dashboard</button>
+              <button id="open-import-modal" class="ghost-btn" type="button">Subir PDF examen</button>
+            </div>
+          </div>
+        </div>
+        <div class="hero-controls">
+          <div class="hero-group hero-mode-group">
+            <div class="mode-switch" role="tablist" aria-label="Seleccion de modo">
+              <button id="mode-practice" class="mode-btn active" type="button" role="tab" aria-selected="true">
+                Ejercicios
+              </button>
+              <button id="mode-exam" class="mode-btn" type="button" role="tab" aria-selected="false">
+                Examenes
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -78,6 +80,17 @@
         </div>
       </div>
 
+      <div id="file-preview-modal" class="modal hidden" aria-hidden="true">
+        <div class="modal-backdrop" data-modal-close="file-preview"></div>
+        <div class="modal-dialog preview-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="file-preview-title">
+          <button id="close-file-preview-modal" class="modal-close" type="button" aria-label="Cerrar vista previa">✕</button>
+          <section class="card preview-card" aria-labelledby="file-preview-title">
+            <h2 id="file-preview-title">Vista previa</h2>
+            <div id="file-preview-content" class="file-preview-content"></div>
+          </section>
+        </div>
+      </div>
+
       <section
         id="practice-add-card"
         class="card reveal mode-panel"
@@ -95,20 +108,18 @@
             <input type="date" id="date" name="date" required />
           </label>
 
-          <label>
-            Asignatura
-            <select id="subject" name="subject" required>
-              <option value="">Selecciona</option>
-              <option value="Mate">Mate</option>
-              <option value="Fisica">Fisica</option>
-            </select>
-          </label>
+          <input type="hidden" id="subject" name="subject" value="Mate" />
 
           <label>
             Examen relacionado (opcional)
             <select id="exerciseExamLink" name="exerciseExamLink">
               <option value="">Sin relacionar</option>
             </select>
+          </label>
+
+          <label class="first-row-right">
+            Captura del ejercicio (opcional)
+            <input id="exerciseScreenshot" name="exerciseScreenshot" class="ghost-input" type="file" accept="image/*" />
           </label>
 
           <label>
@@ -141,15 +152,6 @@
           </label>
 
           <label>
-            ¿Identifique el tipo en &lt;5s?
-            <select id="recognitionSpeed" name="recognitionSpeed" required>
-              <option value="">Selecciona</option>
-              <option value="yes">Si</option>
-              <option value="no">No</option>
-            </select>
-          </label>
-
-          <label>
             Confianza
             <select id="confidenceLevel" name="confidenceLevel" required>
               <option value="">Selecciona</option>
@@ -159,7 +161,7 @@
             </select>
           </label>
 
-          <label class="full-width">
+          <label class="third-row-right">
             Error principal
             <select id="mainError" name="mainError" required>
               <option value="">Selecciona</option>
@@ -193,7 +195,7 @@
             />
           </label>
 
-          <label class="full-width">
+          <label class="last-row-right">
             Regla aprendida
             <input
               type="text"
@@ -208,6 +210,7 @@
           <button id="exercise-cancel-edit" class="ghost-btn full-width hidden" type="button">Cancelar edicion</button>
         </form>
 
+        <p id="exercise-screenshot-feedback" class="feedback" role="status" aria-live="polite"></p>
         <p id="form-feedback" class="feedback" role="status" aria-live="polite"></p>
       </section>
 
@@ -354,6 +357,7 @@
           <h2 id="exam-form-title">Registrar examen completo</h2>
           <span class="pill">Simulacro real</span>
         </div>
+        <p class="muted-copy">Guarda cada simulacro para medir tendencia real de nota y brecha al objetivo.</p>
 
         <form id="exam-form" class="grid-form">
           <label>
@@ -440,6 +444,7 @@
           <h2 id="exam-history-title">Historial de examenes</h2>
           <span class="pill">Tendencia</span>
         </div>
+        <p class="muted-copy">Compara notas recientes y usa la brecha objetivo para decidir prioridades.</p>
 
         <div class="subject-switch" role="tablist" aria-label="Vista de asignatura examenes">
           <button id="exam-view-mate" class="subject-btn active" type="button" role="tab" aria-selected="true">

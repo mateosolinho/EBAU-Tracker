@@ -4,6 +4,7 @@ const TARGETS_STORAGE_KEY = "ebau-tracker-target-scores";
 const MIN_ATTEMPTS_FOR_CONFIDENCE = 3;
 const PDF_DB_NAME = "ebau-tracker-pdf-registry";
 const PDF_STORE_NAME = "pdf-files";
+const EXERCISE_IMAGE_STORE_NAME = "exercise-images";
 let pdfRegistryCache = [];
 
 const form = document.getElementById("exercise-form");
@@ -17,6 +18,8 @@ const examSubmitButton = document.getElementById("exam-submit");
 const examCancelEditButton = document.getElementById("exam-cancel-edit");
 const examHistoryList = document.getElementById("exam-history-list");
 const exerciseExamLinkInput = document.getElementById("exerciseExamLink");
+const exerciseScreenshotInput = document.getElementById("exerciseScreenshot");
+const exerciseScreenshotFeedback = document.getElementById("exercise-screenshot-feedback");
 const examSubjectInput = document.getElementById("examSubject");
 const examWeakBlockInput = document.getElementById("examWeakBlock");
 const examPdfLinkInput = document.getElementById("examPdfLink");
@@ -85,8 +88,11 @@ const openDashboardModalButton = document.getElementById("open-dashboard-modal")
 const openImportModalButton = document.getElementById("open-import-modal");
 const closeDashboardModalButton = document.getElementById("close-dashboard-modal");
 const closeImportModalButton = document.getElementById("close-import-modal");
+const closeFilePreviewModalButton = document.getElementById("close-file-preview-modal");
 const dashboardModal = document.getElementById("dashboard-modal");
 const importModal = document.getElementById("import-modal");
+const filePreviewModal = document.getElementById("file-preview-modal");
+const filePreviewContent = document.getElementById("file-preview-content");
 const subjectInput = document.getElementById("subject");
 const ebauBlockInput = document.getElementById("ebauBlock");
 const ebauSubtypeInput = document.getElementById("ebauSubtype");
@@ -109,6 +115,7 @@ let historyLinkedExamFilter = "";
 let historyLinkedExamName = "";
 let editingExerciseId = "";
 let editingExamId = "";
+let activePreviewObjectUrl = "";
 
 const SUBJECT_KEYWORDS = {
   Mate: [
@@ -416,7 +423,7 @@ function asRiskLabel(score) {
   return "Bajo";
 }
 
-function buildExercise(formData) {
+function buildExercise(formData, screenshotRecord = null) {
   const learnedRule = String(formData.get("learnedRule") || "").trim();
   const exactEbauType = String(formData.get("exactEbauType") || "").trim();
   const linkedExamId = String(formData.get("exerciseExamLink") || "");
@@ -425,13 +432,13 @@ function buildExercise(formData) {
   return {
     id: crypto.randomUUID(),
     date: String(formData.get("date") || ""),
-    subject: String(formData.get("subject") || ""),
+    subject: viewState.practiceSubject || String(formData.get("subject") || ""),
     exerciseType: "Ejercicio",
     ebauBlock: String(formData.get("ebauBlock") || ""),
     ebauSubtype: String(formData.get("ebauSubtype") || ""),
     result: String(formData.get("result") || ""),
     minutes: Number(formData.get("minutes") || 0),
-    recognitionSpeed: String(formData.get("recognitionSpeed") || ""),
+    recognitionSpeed: "",
     confidenceLevel: String(formData.get("confidenceLevel") || ""),
     mainError: String(formData.get("mainError") || ""),
     errorPhase: String(formData.get("errorPhase") || ""),
@@ -439,6 +446,8 @@ function buildExercise(formData) {
     exerciseExamLabel: linkedExam ? formatExamLabel(linkedExam) : "",
     sourcePdfId: linkedExam?.examPdfId || "",
     sourcePdfName: linkedExam?.examPdfName || "",
+    exerciseImageId: screenshotRecord?.id || "",
+    exerciseImageName: screenshotRecord?.name || "",
     exactEbauType,
     learnedRule,
     createdAt: Date.now(),
@@ -461,18 +470,134 @@ function formatBytes(bytes) {
 
 function openPdfRegistryDb() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(PDF_DB_NAME, 1);
+    const request = indexedDB.open(PDF_DB_NAME, 2);
 
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(PDF_STORE_NAME)) {
         db.createObjectStore(PDF_STORE_NAME, { keyPath: "id" });
       }
+      if (!db.objectStoreNames.contains(EXERCISE_IMAGE_STORE_NAME)) {
+        db.createObjectStore(EXERCISE_IMAGE_STORE_NAME, { keyPath: "id" });
+      }
     };
 
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
+}
+
+async function saveExerciseImageRecord(file) {
+  if (!file || !String(file.type || "").startsWith("image/")) {
+    return null;
+  }
+
+  const record = {
+    id: crypto.randomUUID(),
+    name: file.name || "captura-ejercicio",
+    type: file.type || "image/png",
+    size: file.size,
+    uploadedAt: Date.now(),
+    fileBlob: file,
+  };
+
+  const db = await openPdfRegistryDb();
+  try {
+    const transaction = db.transaction(EXERCISE_IMAGE_STORE_NAME, "readwrite");
+    transaction.objectStore(EXERCISE_IMAGE_STORE_NAME).put(record);
+    await completeTransaction(transaction);
+    return record;
+  } finally {
+    db.close();
+  }
+}
+
+async function getExerciseImageRecord(id) {
+  if (!id) {
+    return null;
+  }
+
+  const db = await openPdfRegistryDb();
+  try {
+    const transaction = db.transaction(EXERCISE_IMAGE_STORE_NAME, "readonly");
+    const request = transaction.objectStore(EXERCISE_IMAGE_STORE_NAME).get(id);
+    const record = await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+    await completeTransaction(transaction);
+    return record;
+  } finally {
+    db.close();
+  }
+}
+
+async function deleteExerciseImageRecord(id) {
+  if (!id) {
+    return;
+  }
+
+  const db = await openPdfRegistryDb();
+  try {
+    const transaction = db.transaction(EXERCISE_IMAGE_STORE_NAME, "readwrite");
+    transaction.objectStore(EXERCISE_IMAGE_STORE_NAME).delete(id);
+    await completeTransaction(transaction);
+  } finally {
+    db.close();
+  }
+}
+
+async function openExerciseImageRecord(id, fallbackName = "captura-ejercicio") {
+  const record = await getExerciseImageRecord(id);
+  if (!record?.fileBlob) {
+    feedback.textContent = "No se encontro la captura asociada a este ejercicio.";
+    return;
+  }
+
+  const blob = new Blob([record.fileBlob], { type: record.type || "image/png" });
+  showFilePreview(blob, record.type || "image/png", record.name || fallbackName);
+}
+
+function clearFilePreview() {
+  if (activePreviewObjectUrl) {
+    URL.revokeObjectURL(activePreviewObjectUrl);
+    activePreviewObjectUrl = "";
+  }
+  if (filePreviewContent) {
+    filePreviewContent.innerHTML = "";
+  }
+}
+
+function showFilePreview(blob, mimeType, fileName = "archivo") {
+  if (!filePreviewModal || !filePreviewContent || !blob) {
+    return;
+  }
+
+  clearFilePreview();
+
+  const objectUrl = URL.createObjectURL(blob);
+  activePreviewObjectUrl = objectUrl;
+
+  if (String(mimeType || "").startsWith("image/")) {
+    const image = document.createElement("img");
+    image.className = "file-preview-image";
+    image.src = objectUrl;
+    image.alt = fileName;
+    filePreviewContent.appendChild(image);
+  } else {
+    const frame = document.createElement("iframe");
+    frame.className = "file-preview-frame";
+    frame.src = objectUrl;
+    frame.title = fileName;
+    filePreviewContent.appendChild(frame);
+  }
+
+  openModal(filePreviewModal);
+}
+
+function closeFilePreview() {
+  closeModal(filePreviewModal);
+  clearFilePreview();
 }
 
 function completeTransaction(transaction) {
@@ -535,6 +660,44 @@ async function deletePdfRecord(id) {
   } finally {
     db.close();
   }
+}
+
+async function getPdfRecordById(id) {
+  if (!id) {
+    return null;
+  }
+
+  const db = await openPdfRegistryDb();
+  try {
+    const transaction = db.transaction(PDF_STORE_NAME, "readonly");
+    const request = transaction.objectStore(PDF_STORE_NAME).get(id);
+    const record = await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+    await completeTransaction(transaction);
+    return record;
+  } finally {
+    db.close();
+  }
+}
+
+function openPdfRecord(record, fallbackName = "examen.pdf") {
+  if (!record?.fileBlob) {
+    return;
+  }
+
+  const blob = new Blob([record.fileBlob], { type: record.type || "application/pdf" });
+  showFilePreview(blob, record.type || "application/pdf", record.name || fallbackName);
+}
+
+async function openPdfById(id, fallbackName = "examen.pdf") {
+  const record = await getPdfRecordById(id);
+  if (!record?.fileBlob) {
+    feedback.textContent = "No se encontro el PDF asociado.";
+    return;
+  }
+  openPdfRecord(record, fallbackName);
 }
 
 function downloadPdfRecord(record) {
@@ -632,6 +795,7 @@ async function renderPdfRegistry() {
       const actions = document.createElement("div");
       actions.className = "pdf-item-actions";
       actions.append(
+        createItemActionButton("Ver", "edit", () => openPdfRecord(record, record.name || "examen.pdf")),
         createItemActionButton("Descargar", "edit", () => downloadPdfRecord(record)),
         createItemActionButton("Borrar", "delete", async () => {
           const linkedExercises = exerciseCounts[record.id] || 0;
@@ -1331,6 +1495,12 @@ function setExamEditMode(isEditing) {
 function resetExerciseEditMode() {
   editingExerciseId = "";
   form.reset();
+  if (exerciseScreenshotInput) {
+    exerciseScreenshotInput.value = "";
+  }
+  if (exerciseScreenshotFeedback) {
+    exerciseScreenshotFeedback.textContent = "";
+  }
   document.getElementById("date").valueAsDate = new Date();
   subjectInput.value = viewState.practiceSubject;
   syncEbauInputsForSubject();
@@ -1394,10 +1564,15 @@ function wireHistoryCardEdit(item, onEdit) {
   });
 }
 
-function deleteExerciseById(id) {
+async function deleteExerciseById(id) {
   const shouldDelete = window.confirm("¿Seguro que quieres borrar este ejercicio?");
   if (!shouldDelete) {
     return;
+  }
+
+  const exerciseToDelete = readExercises().find((exercise) => exercise.id === id);
+  if (exerciseToDelete?.exerciseImageId) {
+    await deleteExerciseImageRecord(exerciseToDelete.exerciseImageId);
   }
 
   const exercises = readExercises().filter((exercise) => exercise.id !== id);
@@ -1425,12 +1600,19 @@ function editExerciseById(id) {
   renderExerciseExamOptions(subjectInput.value, exercise.exerciseExamId || "");
   document.getElementById("result").value = exercise.result || "";
   document.getElementById("minutes").value = String(exercise.minutes ?? "");
-  document.getElementById("recognitionSpeed").value = exercise.recognitionSpeed || "";
   document.getElementById("confidenceLevel").value = exercise.confidenceLevel || "";
   document.getElementById("mainError").value = exercise.mainError || "";
   document.getElementById("errorPhase").value = exercise.errorPhase || "";
   document.getElementById("exactEbauType").value = exercise.exactEbauType || "";
   document.getElementById("learnedRule").value = exercise.learnedRule || "";
+  if (exerciseScreenshotInput) {
+    exerciseScreenshotInput.value = "";
+  }
+  if (exerciseScreenshotFeedback) {
+    exerciseScreenshotFeedback.textContent = exercise.exerciseImageId
+      ? `Captura actual: ${exercise.exerciseImageName || "captura"}. Si subes otra, reemplazas la actual.`
+      : "Sin captura asociada.";
+  }
 
   setExerciseEditMode(true);
   feedback.textContent = "Modo edicion: actualiza los campos y guarda el ejercicio.";
@@ -1542,15 +1724,43 @@ function renderHistory(exercises) {
     item.append(topRow, meta);
     appendStrongParagraph(item, "Error", ex.mainError);
     appendStrongParagraph(item, "Fase", ex.errorPhase || "-");
-    appendStrongParagraph(
-      item,
-      "Reconocimiento <5s",
-      ex.recognitionSpeed ? (ex.recognitionSpeed === "yes" ? "Si" : "No") : "-"
-    );
     appendStrongParagraph(item, "Confianza", ex.confidenceLevel || "-");
     appendStrongParagraph(item, "Tipo exacto EBAU", ex.exactEbauType || "-");
     appendStrongParagraph(item, "Examen relacionado", ex.exerciseExamLabel || "-");
-    appendStrongParagraph(item, "PDF origen", ex.sourcePdfName || "-");
+    if (ex.sourcePdfId) {
+      const pdfRow = document.createElement("p");
+      pdfRow.className = "history-detail";
+      const strong = document.createElement("strong");
+      strong.textContent = "PDF origen: ";
+      const button = createItemActionButton("Ver", "edit", async () => {
+        await openPdfById(ex.sourcePdfId, ex.sourcePdfName || "examen.pdf");
+      });
+      pdfRow.append(
+        strong,
+        document.createTextNode(`${ex.sourcePdfName || "PDF asociado"} `),
+        button
+      );
+      item.appendChild(pdfRow);
+    } else {
+      appendStrongParagraph(item, "PDF origen", "-");
+    }
+    if (ex.exerciseImageId) {
+      const imageRow = document.createElement("p");
+      imageRow.className = "history-detail";
+      const strong = document.createElement("strong");
+      strong.textContent = "Captura: ";
+      const button = createItemActionButton("Ver", "edit", async () => {
+        await openExerciseImageRecord(ex.exerciseImageId, ex.exerciseImageName || "captura");
+      });
+      imageRow.append(
+        strong,
+        document.createTextNode(`${ex.exerciseImageName || "captura"} `),
+        button
+      );
+      item.appendChild(imageRow);
+    } else {
+      appendStrongParagraph(item, "Captura", "-");
+    }
     appendStrongParagraph(item, "Origen", ex.importedFromExam ? "Importado de examen" : "Manual");
     appendStrongParagraph(item, "Regla", ex.learnedRule || "-");
 
@@ -1656,7 +1866,23 @@ function renderExamHistory(exams) {
 
     item.append(topRow, meta);
     appendStrongParagraph(item, "Bloque flojo", exam.weakBlock || "-");
-    appendStrongParagraph(item, "PDF asociado", exam.examPdfName || "-");
+    if (exam.examPdfId) {
+      const pdfRow = document.createElement("p");
+      pdfRow.className = "history-detail";
+      const strong = document.createElement("strong");
+      strong.textContent = "PDF asociado: ";
+      const button = createItemActionButton("Ver", "edit", async () => {
+        await openPdfById(exam.examPdfId, exam.examPdfName || "examen.pdf");
+      });
+      pdfRow.append(
+        strong,
+        document.createTextNode(`${exam.examPdfName || "PDF asociado"} `),
+        button
+      );
+      item.appendChild(pdfRow);
+    } else {
+      appendStrongParagraph(item, "PDF asociado", "-");
+    }
     appendStrongParagraph(item, "Error dominante", exam.mainError);
     appendStrongParagraph(item, "Plan accion", exam.actionPlan || "-");
 
@@ -1719,10 +1945,6 @@ function setMode(modeName) {
     activeMode === "exam" ? "true" : "false"
   );
 
-  if (practiceQuickActions) {
-    practiceQuickActions.classList.toggle("hidden", activeMode !== "practice");
-  }
-
   if (activeMode !== "practice") {
     closeModal(dashboardModal);
     closeModal(importModal);
@@ -1732,7 +1954,8 @@ function setMode(modeName) {
 function updateBodyModalState() {
   const hasOpenModal =
     (dashboardModal && !dashboardModal.classList.contains("hidden")) ||
-    (importModal && !importModal.classList.contains("hidden"));
+    (importModal && !importModal.classList.contains("hidden")) ||
+    (filePreviewModal && !filePreviewModal.classList.contains("hidden"));
   document.body.classList.toggle("modal-open", Boolean(hasOpenModal));
 }
 
@@ -2081,11 +2304,23 @@ function render() {
   renderExamHistory(exams);
 }
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
     const formData = new FormData(form);
-    const exercise = buildExercise(formData);
+    const screenshotFile = formData.get("exerciseScreenshot");
+    const hasScreenshotFile = screenshotFile instanceof File && screenshotFile.size > 0;
+    let screenshotRecord = null;
+
+    if (hasScreenshotFile) {
+      if (!String(screenshotFile.type || "").startsWith("image/")) {
+        feedback.textContent = "La captura debe ser una imagen valida (PNG, JPG, WEBP, etc.).";
+        return;
+      }
+      screenshotRecord = await saveExerciseImageRecord(screenshotFile);
+    }
+
+    const exercise = buildExercise(formData, screenshotRecord);
 
     if (!exercise.mainError) {
       feedback.textContent = "El campo Error principal es obligatorio.";
@@ -2097,7 +2332,6 @@ form.addEventListener("submit", (event) => {
       !exercise.subject ||
       !exercise.result ||
       !exercise.minutes ||
-      !exercise.recognitionSpeed ||
       !exercise.confidenceLevel ||
       !exercise.errorPhase
     ) {
@@ -2114,10 +2348,22 @@ form.addEventListener("submit", (event) => {
     if (editingExerciseId) {
       const index = exercises.findIndex((item) => item.id === editingExerciseId);
       if (index >= 0) {
+        const previousExercise = exercises[index];
+        const keepPreviousImage = !hasScreenshotFile && previousExercise.exerciseImageId;
+        if (hasScreenshotFile && previousExercise.exerciseImageId) {
+          await deleteExerciseImageRecord(previousExercise.exerciseImageId);
+        }
+
         exercises[index] = {
           ...exercise,
           id: exercises[index].id,
           createdAt: exercises[index].createdAt,
+          exerciseImageId: keepPreviousImage
+            ? previousExercise.exerciseImageId
+            : exercise.exerciseImageId,
+          exerciseImageName: keepPreviousImage
+            ? previousExercise.exerciseImageName
+            : exercise.exerciseImageName,
         };
       } else {
         exercises.push(exercise);
@@ -2130,6 +2376,9 @@ form.addEventListener("submit", (event) => {
     feedback.textContent = editingExerciseId
       ? "Ejercicio actualizado. Patrones recalculados."
       : "Ejercicio guardado. Patrones actualizados.";
+    if (exerciseScreenshotFeedback) {
+      exerciseScreenshotFeedback.textContent = "";
+    }
     resetExerciseEditMode();
     render();
   } catch {
@@ -2230,11 +2479,15 @@ openDashboardModalButton?.addEventListener("click", () => {
 openImportModalButton?.addEventListener("click", () => openModal(importModal));
 closeDashboardModalButton?.addEventListener("click", () => closeModal(dashboardModal));
 closeImportModalButton?.addEventListener("click", () => closeModal(importModal));
+closeFilePreviewModalButton?.addEventListener("click", closeFilePreview);
 document.querySelectorAll("[data-modal-close='dashboard']").forEach((element) => {
   element.addEventListener("click", () => closeModal(dashboardModal));
 });
 document.querySelectorAll("[data-modal-close='import']").forEach((element) => {
   element.addEventListener("click", () => closeModal(importModal));
+});
+document.querySelectorAll("[data-modal-close='file-preview']").forEach((element) => {
+  element.addEventListener("click", closeFilePreview);
 });
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") {
@@ -2242,6 +2495,7 @@ document.addEventListener("keydown", (event) => {
   }
   closeModal(dashboardModal);
   closeModal(importModal);
+  closeFilePreview();
 });
 subjectViewButtons.global.Mate.addEventListener("click", () => setSubjectView("practice", "Mate"));
 subjectViewButtons.global.Fisica.addEventListener("click", () => setSubjectView("practice", "Fisica"));
