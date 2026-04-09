@@ -263,7 +263,7 @@ function setSubtypeOptionsForBlock(blockName) {
     return;
   }
 
-  placeholder.textContent = "Selecciona";
+  placeholder.textContent = "Opcional";
   ebauSubtypeInput.appendChild(placeholder);
 
   for (const subtype of subjectConfig.blocks[blockName].subtypes) {
@@ -272,6 +272,11 @@ function setSubtypeOptionsForBlock(blockName) {
     option.textContent = subtype;
     ebauSubtypeInput.appendChild(option);
   }
+
+  const customOption = document.createElement("option");
+  customOption.value = "Otro / personalizado";
+  customOption.textContent = "Otro / personalizado";
+  ebauSubtypeInput.appendChild(customOption);
 }
 
 function syncEbauInputsForSubject() {
@@ -430,6 +435,7 @@ function buildExercise(formData, screenshotRecord = null) {
   const exactEbauType = String(formData.get("exactEbauType") || "").trim();
   const linkedExamId = String(formData.get("exerciseExamLink") || "");
   const linkedExam = readExams().find((exam) => exam.id === linkedExamId);
+  const mainError = String(formData.get("mainError") || "").trim() || "Sin error";
 
   return {
     id: crypto.randomUUID(),
@@ -442,7 +448,7 @@ function buildExercise(formData, screenshotRecord = null) {
     minutes: Number(formData.get("minutes") || 0),
     recognitionSpeed: "",
     confidenceLevel: String(formData.get("confidenceLevel") || ""),
-    mainError: String(formData.get("mainError") || ""),
+    mainError,
     errorPhase: String(formData.get("errorPhase") || ""),
     exerciseExamId: linkedExam?.id || "",
     exerciseExamLabel: linkedExam ? formatExamLabel(linkedExam) : "",
@@ -1070,6 +1076,7 @@ function buildImportedExercisesFromText(examText, sourcePdf = null) {
 function buildExamAttempt(formData) {
   const linkedPdfId = String(formData.get("examPdfLink") || "");
   const linkedPdfRecord = pdfRegistryCache.find((record) => record.id === linkedPdfId);
+  const mainError = String(formData.get("examMainError") || "").trim() || "Sin error";
 
   return {
     id: crypto.randomUUID(),
@@ -1081,7 +1088,7 @@ function buildExamAttempt(formData) {
     weakBlock: String(formData.get("examWeakBlock") || "").trim(),
     examPdfId: linkedPdfRecord?.id || "",
     examPdfName: linkedPdfRecord?.name || "",
-    mainError: String(formData.get("examMainError") || ""),
+    mainError,
     actionPlan: String(formData.get("examActionPlan") || "").trim(),
     createdAt: Date.now(),
   };
@@ -1611,8 +1618,21 @@ function appendStrongParagraph(container, label, value) {
   paragraph.className = "history-detail";
   const strong = document.createElement("strong");
   strong.textContent = `${label}: `;
-  paragraph.append(strong, value);
+  paragraph.append(strong, displayValue(value));
   container.appendChild(paragraph);
+}
+
+function displayValue(value, fallback = "-") {
+  if (value === null || value === undefined) {
+    return fallback;
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? String(value) : fallback;
+  }
+
+  const normalized = String(value).trim();
+  return normalized ? normalized : fallback;
 }
 
 function createItemActionButton(label, className, onClick) {
@@ -1788,21 +1808,21 @@ function renderHistory(exercises) {
 
     const dateBadge = document.createElement("span");
     dateBadge.className = "badge";
-    dateBadge.textContent = ex.date;
+    dateBadge.textContent = displayValue(ex.date);
 
     const subject = document.createElement("span");
-    subject.textContent = ex.subject;
+    subject.textContent = displayValue(ex.subject);
 
     const type = document.createElement("span");
-    type.textContent = ex.exerciseType;
+    type.textContent = displayValue(ex.exerciseType);
 
     const ebau = document.createElement("span");
     ebau.textContent = ex.ebauBlock
-      ? `${ex.subject}: ${ex.ebauBlock}${ex.ebauSubtype ? ` / ${ex.ebauSubtype}` : ""}`
+      ? `${displayValue(ex.subject)}: ${displayValue(ex.ebauBlock)}${ex.ebauSubtype ? ` / ${displayValue(ex.ebauSubtype)}` : ""}`
       : "Sin bloque oficial";
 
     const time = document.createElement("span");
-    time.textContent = `${ex.minutes} min`;
+    time.textContent = `${displayValue(ex.minutes)} min`;
 
     meta.append(dateBadge, subject, type, ebau, time);
 
@@ -1917,7 +1937,9 @@ function renderExamHistory(exams) {
 
     const title = document.createElement("h4");
     title.className = "history-title";
-    title.textContent = `Nota ${exam.score.toFixed(2)} / 10`;
+    title.textContent = Number.isFinite(Number(exam.score))
+      ? `Nota ${Number(exam.score).toFixed(2)} / 10`
+      : "Nota - / 10";
 
     const actions = document.createElement("div");
     actions.className = "item-actions";
@@ -1936,16 +1958,16 @@ function renderExamHistory(exams) {
 
     const dateBadge = document.createElement("span");
     dateBadge.className = "badge";
-    dateBadge.textContent = exam.date;
+    dateBadge.textContent = displayValue(exam.date);
 
     const subject = document.createElement("span");
-    subject.textContent = exam.subject;
+    subject.textContent = displayValue(exam.subject);
 
     const examType = document.createElement("span");
-    examType.textContent = exam.examType;
+    examType.textContent = displayValue(exam.examType);
 
     const minutes = document.createElement("span");
-    minutes.textContent = `${exam.minutes} min`;
+    minutes.textContent = `${displayValue(exam.minutes)} min`;
 
     meta.append(dateBadge, subject, examType, minutes);
 
@@ -2411,28 +2433,6 @@ form.addEventListener("submit", async (event) => {
 
     const exercise = buildExercise(formData, screenshotRecord);
 
-    if (!exercise.mainError) {
-      feedback.textContent = "El campo Error principal es obligatorio.";
-      return;
-    }
-
-    if (
-      !exercise.date ||
-      !exercise.subject ||
-      !exercise.result ||
-      !exercise.minutes ||
-      !exercise.confidenceLevel ||
-      !exercise.errorPhase
-    ) {
-      feedback.textContent = "Completa todos los campos obligatorios antes de guardar.";
-      return;
-    }
-
-    if (SUBJECT_STRUCTURES[exercise.subject] && (!exercise.ebauBlock || !exercise.ebauSubtype)) {
-      feedback.textContent = "Selecciona bloque oficial y subtipo para medir ROI real de la asignatura.";
-      return;
-    }
-
     const exercises = readExercises();
     if (editingExerciseId) {
       const index = exercises.findIndex((item) => item.id === editingExerciseId);
@@ -2500,18 +2500,6 @@ examForm.addEventListener("submit", (event) => {
   try {
     const formData = new FormData(examForm);
     const exam = buildExamAttempt(formData);
-
-    if (
-      !exam.date ||
-      !exam.subject ||
-      !exam.examType ||
-      !exam.weakBlock ||
-      !exam.mainError ||
-      !exam.minutes
-    ) {
-      examFeedback.textContent = "Completa todos los campos obligatorios del examen.";
-      return;
-    }
 
     if (exam.score < 0 || exam.score > 10) {
       examFeedback.textContent = "La nota debe estar entre 0 y 10.";

@@ -105,7 +105,7 @@
         <form id="exercise-form" class="grid-form">
           <label>
             Fecha
-            <input type="date" id="date" name="date" required />
+            <input type="date" id="date" name="date" />
           </label>
 
           <input type="hidden" id="subject" name="subject" value="Mate" />
@@ -138,7 +138,7 @@
 
           <label>
             Resultado
-            <select id="result" name="result" required>
+            <select id="result" name="result">
               <option value="">Selecciona</option>
               <option value="ok">✔ Acierto</option>
               <option value="fail">❌ Fallo</option>
@@ -148,12 +148,12 @@
 
           <label>
             Tiempo (min)
-            <input type="number" id="minutes" name="minutes" min="1" max="300" required />
+            <input type="number" id="minutes" name="minutes" min="0" max="300" />
           </label>
 
           <label>
             Confianza
-            <select id="confidenceLevel" name="confidenceLevel" required>
+            <select id="confidenceLevel" name="confidenceLevel">
               <option value="">Selecciona</option>
               <option value="seguro">Seguro</option>
               <option value="duda">Duda</option>
@@ -163,19 +163,20 @@
 
           <label class="third-row-right">
             Error principal
-            <select id="mainError" name="mainError" required>
-              <option value="">Selecciona</option>
+            <select id="mainError" name="mainError">
+              <option value="">Sin error</option>
               <option>No identifique el tipo</option>
               <option>Error de calculo</option>
               <option>Me bloquee</option>
               <option>Error de planteamiento</option>
               <option>Descuidado</option>
+              <option>No me se la formula</option>
             </select>
           </label>
 
           <label>
             Fase del error
-            <select id="errorPhase" name="errorPhase" required>
+            <select id="errorPhase" name="errorPhase">
               <option value="">Selecciona</option>
               <option value="Reconocimiento">Reconocimiento</option>
               <option value="Planteamiento">Planteamiento</option>
@@ -362,12 +363,12 @@
         <form id="exam-form" class="grid-form">
           <label>
             Fecha
-            <input type="date" id="examDate" name="examDate" required />
+            <input type="date" id="examDate" name="examDate" />
           </label>
 
           <label>
             Asignatura
-            <select id="examSubject" name="examSubject" required>
+            <select id="examSubject" name="examSubject">
               <option value="">Selecciona</option>
               <option value="Mate">Mate</option>
               <option value="Fisica">Fisica</option>
@@ -376,7 +377,7 @@
 
           <label>
             Tipo de examen
-            <select id="examType" name="examType" required>
+            <select id="examType" name="examType">
               <option value="">Selecciona</option>
               <option value="Simulacro">Simulacro</option>
               <option value="Oficial junio">Oficial junio</option>
@@ -387,17 +388,17 @@
 
           <label>
             Nota (0-10)
-            <input type="number" id="examScore" name="examScore" min="0" max="10" step="0.01" required />
+            <input type="number" id="examScore" name="examScore" min="0" max="10" step="0.01" />
           </label>
 
           <label>
             Tiempo (min)
-            <input type="number" id="examMinutes" name="examMinutes" min="30" max="240" required />
+            <input type="number" id="examMinutes" name="examMinutes" min="0" max="240" />
           </label>
 
           <label>
             Bloque mas flojo
-            <select id="examWeakBlock" name="examWeakBlock" required>
+            <select id="examWeakBlock" name="examWeakBlock">
               <option value="">Selecciona asignatura primero</option>
             </select>
           </label>
@@ -411,13 +412,14 @@
 
           <label class="full-width">
             Error dominante
-            <select id="examMainError" name="examMainError" required>
-              <option value="">Selecciona</option>
+            <select id="examMainError" name="examMainError">
+              <option value="">Sin error</option>
               <option>No identifique el tipo</option>
               <option>Error de calculo</option>
               <option>Me bloquee</option>
               <option>Error de planteamiento</option>
               <option>Descuidado</option>
+              <option>No me se la formula</option>
             </select>
           </label>
 

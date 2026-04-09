@@ -1,0 +1,2174 @@
+{
+  "meta": {
+    "titulo": "Formulario de Física ABAU hiper detallado",
+    "idioma": "es",
+    "criterio_signos": "DIN",
+    "nota": "Las fórmulas con signo pueden variar ligeramente según el convenio de signos. Aquí se prioriza un criterio consistente con ABAU y con los apuntes del usuario.",
+    "nivel": "Bachillerato / ABAU",
+    "uso": [
+      "web educativa",
+      "buscador de fórmulas",
+      "repaso guiado",
+      "tarjetas de estudio"
+    ]
+  },
+  "bloques": [
+    {
+      "bloque": "1. Campo Gravitatorio",
+      "descripcion": "Interacción entre masas, potencial gravitatorio, órbitas y escape.",
+      "detalles": [
+        {
+          "apartado": "Leyes y Campo",
+          "formulas": [
+            {
+              "nombre": "Ley de Gravitación Universal",
+              "latex": "\\vec{F} = -G\\,\\frac{Mm}{r^2}\\,\\vec{u}_r",
+              "idea": "La fuerza entre dos masas es atractiva, central y proporcional al producto de las masas e inversamente proporcional al cuadrado de la distancia.",
+              "variables": [
+                {
+                  "simbolo": "G",
+                  "significado": "Constante de gravitación universal",
+                  "valor_aprox": "6.67\\times10^{-11}",
+                  "unidad": "N·m²/kg²"
+                },
+                {
+                  "simbolo": "M",
+                  "significado": "Masa creadora del campo",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "m",
+                  "significado": "Masa que siente la fuerza",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "r",
+                  "significado": "Distancia entre centros de masa",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "\\vec{u}_r",
+                  "significado": "Vector unitario radial",
+                  "unidad": "adimensional"
+                }
+              ],
+              "despejes": {
+                "M": "M = \\frac{F r^2}{G m}",
+                "m": "m = \\frac{F r^2}{G M}",
+                "r": "r = \\sqrt{\\frac{G M m}{F}}",
+                "F": "F = G\\,\\frac{Mm}{r^2}"
+              },
+              "derivacion": "Se obtiene experimentalmente y explica la atracción entre masas puntuales o esferas homogéneas vistas desde fuera.",
+              "unidades": {
+                "SI": "N",
+                "comprobacion": "\\mathrm{kg\\,m/s^2}"
+              },
+              "relaciones": [
+                "\\,F = mg\\, cerca de la superficie terrestre",
+                "\\,g = \\frac{GM}{r^2}\\, como magnitud del campo"
+              ],
+              "errores_tipicos": [
+                "Olvidar que la fuerza es siempre atractiva.",
+                "Confundir r con el radio del cuerpo cuando el punto está a altura h.",
+                "No usar unidades SI."
+              ]
+            },
+            {
+              "nombre": "Intensidad de Campo Gravitatorio",
+              "latex": "\\vec{g} = \\frac{\\vec{F}}{m} = -G\\,\\frac{M}{r^2}\\,\\vec{u}_r",
+              "idea": "El campo gravitatorio es la fuerza por unidad de masa que sentiría una masa de prueba.",
+              "variables": [
+                {
+                  "simbolo": "\\vec{g}",
+                  "significado": "Campo gravitatorio",
+                  "unidad": "N/kg o m/s²"
+                },
+                {
+                  "simbolo": "M",
+                  "significado": "Masa que genera el campo",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "r",
+                  "significado": "Distancia al centro de la masa",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "M": "M = \\frac{g r^2}{G}",
+                "r": "r = \\sqrt{\\frac{G M}{g}}",
+                "g": "g = \\frac{G M}{r^2}"
+              },
+              "derivacion": "Sale de dividir la ley de gravitación entre la masa de prueba.",
+              "unidades": {
+                "SI": "m/s²",
+                "equivalencias": "1 N/kg = 1 m/s²"
+              },
+              "relaciones": [
+                "\\,\\vec{F} = m\\vec{g}\\,",
+                "\\,g\\, disminuye como \\frac{1}{r^2}"
+              ],
+              "errores_tipicos": [
+                "Pensar que g depende de la masa del objeto que cae.",
+                "Confundir campo con fuerza.",
+                "Olvidar que es vector y apunta al centro."
+              ]
+            },
+            {
+              "nombre": "Variación de g con la altura",
+              "latex": "g(h) = g_0\\,\\frac{R^2}{(R+h)^2}",
+              "idea": "La gravedad disminuye al aumentar la distancia al centro del planeta.",
+              "variables": [
+                {
+                  "simbolo": "g_0",
+                  "significado": "Gravedad en la superficie",
+                  "unidad": "m/s²"
+                },
+                {
+                  "simbolo": "R",
+                  "significado": "Radio del planeta",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "h",
+                  "significado": "Altura sobre la superficie",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "h": "h = R\\left(\\sqrt{\\frac{g_0}{g}} - 1\\right)",
+                "R+h": "R+h = R\\sqrt{\\frac{g_0}{g}}"
+              },
+              "derivacion": "Se compara g en r=R con g en r=R+h usando la ley del inverso del cuadrado.",
+              "unidades": {
+                "SI": "m/s²"
+              },
+              "errores_tipicos": [
+                "Usar h como si fuera la distancia al centro.",
+                "Olvidar que el radio del planeta también cuenta.",
+                "Aplicar la fórmula para alturas enormes sin revisar el modelo."
+              ]
+            },
+            {
+              "nombre": "Campo gravitatorio en la superficie",
+              "latex": "g_0 = \\frac{GM}{R^2}",
+              "idea": "Es el caso particular de la expresión general del campo cuando r = R.",
+              "variables": [
+                {
+                  "simbolo": "M",
+                  "significado": "Masa del planeta",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "R",
+                  "significado": "Radio del planeta",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "M": "M = \\frac{g_0 R^2}{G}",
+                "R": "R = \\sqrt{\\frac{GM}{g_0}}"
+              },
+              "unidades": {
+                "SI": "m/s²"
+              },
+              "errores_tipicos": [
+                "Olvidar que solo vale para superficie o aproximación de superficie."
+              ]
+            },
+            {
+              "nombre": "Trabajo del campo gravitatorio",
+              "latex": "W_{i\\to f} = GMm\\left(\\frac{1}{r_f} - \\frac{1}{r_i}\\right)",
+              "idea": "El trabajo gravitatorio depende solo de la posición inicial y final, no del camino.",
+              "variables": [
+                {
+                  "simbolo": "r_i",
+                  "significado": "Distancia inicial al centro",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "r_f",
+                  "significado": "Distancia final al centro",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "W": "W = GMm\\left(\\frac{1}{r_f} - \\frac{1}{r_i}\\right)",
+                "r_f": "\\frac{1}{r_f} = \\frac{W}{GMm} + \\frac{1}{r_i}"
+              },
+              "derivacion": "Se integra F·dr para una fuerza central inversa al cuadrado.",
+              "unidades": {
+                "SI": "J"
+              },
+              "relaciones": [
+                "W = -\\Delta E_p",
+                "El campo gravitatorio es conservativo."
+              ],
+              "errores_tipicos": [
+                "Confundir el signo del trabajo.",
+                "Poner r sin distinguir posición inicial y final."
+              ]
+            }
+          ],
+          "teoria_razonamiento": [
+            "El campo gravitatorio es conservativo: el trabajo solo depende de la posición inicial y final.",
+            "Las superficies equipotenciales son esferas concéntricas y el campo es perpendicular a ellas.",
+            "El principio de superposición se aplica vectorialmente: el campo total es la suma de los campos individuales."
+          ]
+        },
+        {
+          "apartado": "Energía y Órbitas",
+          "formulas": [
+            {
+              "nombre": "Energía Potencial Gravitatoria",
+              "latex": "E_p = -G\\,\\frac{Mm}{r}",
+              "idea": "La energía potencial se define tomando cero en el infinito. El signo negativo indica estado ligado.",
+              "variables": [
+                {
+                  "simbolo": "M",
+                  "significado": "Masa creadora",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "m",
+                  "significado": "Masa del cuerpo",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "r",
+                  "significado": "Distancia entre centros",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "r": "r = -G\\,\\frac{Mm}{E_p}",
+                "M": "M = -\\frac{E_p r}{Gm}",
+                "m": "m = -\\frac{E_p r}{GM}"
+              },
+              "relaciones": [
+                "E_p(\\infty)=0",
+                "W = -\\Delta E_p"
+              ],
+              "errores_tipicos": [
+                "Olvidar el signo negativo.",
+                "Usar esta expresión dentro de la Tierra sin revisar el modelo."
+              ],
+              "unidades": {
+                "SI": "J"
+              }
+            },
+            {
+              "nombre": "Potencial Gravitatorio",
+              "latex": "V = -G\\,\\frac{M}{r}",
+              "idea": "Es la energía potencial por unidad de masa.",
+              "variables": [
+                {
+                  "simbolo": "V",
+                  "significado": "Potencial gravitatorio",
+                  "unidad": "J/kg"
+                },
+                {
+                  "simbolo": "M",
+                  "significado": "Masa fuente",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "r",
+                  "significado": "Distancia al centro",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "M": "M = -\\frac{Vr}{G}",
+                "r": "r = -\\frac{GM}{V}"
+              },
+              "relaciones": [
+                "E_p = mV",
+                "\\Delta V = \\frac{\\Delta E_p}{m}"
+              ],
+              "unidades": {
+                "SI": "J/kg"
+              },
+              "errores_tipicos": [
+                "No distinguir potencial de energía potencial."
+              ]
+            },
+            {
+              "nombre": "Energía potencial y potencial entre dos puntos",
+              "latex": "\\Delta V = V_f - V_i = GM\\left(\\frac{1}{r_i} - \\frac{1}{r_f}\\right)",
+              "idea": "Mide cuánto cambia el potencial al mover una masa de prueba.",
+              "variables": [
+                {
+                  "simbolo": "r_i",
+                  "significado": "Distancia inicial",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "r_f",
+                  "significado": "Distancia final",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {},
+              "relaciones": [
+                "\\Delta E_p = m\\Delta V"
+              ],
+              "unidades": {
+                "SI": "J/kg"
+              }
+            },
+            {
+              "nombre": "Velocidad orbital",
+              "latex": "v_o = \\sqrt{\\frac{GM}{r}}",
+              "idea": "Para órbita circular, la fuerza gravitatoria proporciona la aceleración centrípeta.",
+              "variables": [
+                {
+                  "simbolo": "r",
+                  "significado": "Radio de la órbita",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "M",
+                  "significado": "Masa central",
+                  "unidad": "kg"
+                }
+              ],
+              "despejes": {
+                "r": "r = \\frac{GM}{v_o^2}",
+                "M": "M = \\frac{v_o^2 r}{G}"
+              },
+              "derivacion": "Se iguala GMm/r² = mv²/r y se despeja v.",
+              "unidades": {
+                "SI": "m/s"
+              },
+              "errores_tipicos": [
+                "Olvidar que r es la distancia al centro, no la altura.",
+                "Aplicar la fórmula fuera de órbitas circulares como si fuera exacta."
+              ]
+            },
+            {
+              "nombre": "3ª Ley de Kepler",
+              "latex": "T^2 = \\frac{4\\pi^2}{GM}\\,r^3",
+              "idea": "El cuadrado del periodo es proporcional al cubo del radio orbital.",
+              "variables": [
+                {
+                  "simbolo": "T",
+                  "significado": "Periodo orbital",
+                  "unidad": "s"
+                },
+                {
+                  "simbolo": "r",
+                  "significado": "Radio orbital",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "M",
+                  "significado": "Masa central",
+                  "unidad": "kg"
+                }
+              ],
+              "despejes": {
+                "T": "T = 2\\pi\\sqrt{\\frac{r^3}{GM}}",
+                "r": "r = \\sqrt[3]{\\frac{GMT^2}{4\\pi^2}}",
+                "M": "M = \\frac{4\\pi^2 r^3}{GT^2}"
+              },
+              "derivacion": "Se sustituye v = 2\\pi r/T en la velocidad orbital.",
+              "unidades": {
+                "SI": "s²"
+              },
+              "errores_tipicos": [
+                "Usar r como altura sin sumar el radio del planeta.",
+                "Olvidar el factor 4\\pi²."
+              ]
+            },
+            {
+              "nombre": "Relación entre periodo y velocidad orbital",
+              "latex": "T = \\frac{2\\pi r}{v_o}",
+              "idea": "Periodo = longitud de la circunferencia / velocidad.",
+              "variables": [
+                {
+                  "simbolo": "r",
+                  "significado": "Radio de la órbita",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "v_o",
+                  "significado": "Velocidad orbital",
+                  "unidad": "m/s"
+                }
+              ],
+              "despejes": {
+                "v_o": "v_o = \\frac{2\\pi r}{T}",
+                "r": "r = \\frac{v_o T}{2\\pi}"
+              },
+              "unidades": {
+                "SI": "s"
+              }
+            },
+            {
+              "nombre": "Energía mecánica orbital",
+              "latex": "E_m = E_c + E_p = -\\frac{1}{2}G\\,\\frac{Mm}{r}",
+              "idea": "En órbita circular, la energía mecánica es negativa y vale la mitad de la potencial con signo opuesto.",
+              "variables": [
+                {
+                  "simbolo": "E_c",
+                  "significado": "Energía cinética",
+                  "unidad": "J"
+                },
+                {
+                  "simbolo": "E_p",
+                  "significado": "Energía potencial",
+                  "unidad": "J"
+                }
+              ],
+              "despejes": {
+                "E_c": "E_c = \\frac{1}{2}G\\,\\frac{Mm}{r}",
+                "E_p": "E_p = -2E_c"
+              },
+              "relaciones": [
+                "E_m = -E_c",
+                "E_m = \\frac{1}{2}E_p"
+              ],
+              "unidades": {
+                "SI": "J"
+              },
+              "errores_tipicos": [
+                "Pensar que la energía mecánica orbital puede ser positiva en órbita ligada."
+              ]
+            },
+            {
+              "nombre": "Velocidad de escape",
+              "latex": "v_e = \\sqrt{\\frac{2GM}{R}}",
+              "idea": "Es la velocidad mínima para llegar al infinito con velocidad final cero.",
+              "variables": [
+                {
+                  "simbolo": "M",
+                  "significado": "Masa del astro",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "R",
+                  "significado": "Radio del astro desde donde se lanza",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "M": "M = \\frac{v_e^2 R}{2G}",
+                "R": "R = \\frac{2GM}{v_e^2}"
+              },
+              "derivacion": "Se iguala la energía mecánica inicial a la del infinito: E_m(inf)=0.",
+              "unidades": {
+                "SI": "m/s"
+              },
+              "errores_tipicos": [
+                "Creer que depende de la masa del objeto lanzado.",
+                "Usar R como altura y no como distancia al centro."
+              ]
+            },
+            {
+              "nombre": "Momento angular en órbita",
+              "latex": "L = mvr",
+              "idea": "En una fuerza central el momento angular se conserva.",
+              "variables": [
+                {
+                  "simbolo": "L",
+                  "significado": "Momento angular",
+                  "unidad": "kg·m²/s"
+                },
+                {
+                  "simbolo": "v",
+                  "significado": "Velocidad",
+                  "unidad": "m/s"
+                },
+                {
+                  "simbolo": "r",
+                  "significado": "Radio",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "v": "v = \\frac{L}{mr}",
+                "r": "r = \\frac{L}{mv}"
+              },
+              "relaciones": [
+                "Explica la 2ª ley de Kepler"
+              ],
+              "unidades": {
+                "SI": "kg·m²/s"
+              }
+            }
+          ],
+          "teoria_razonamiento": [
+            "Un satélite geoestacionario tiene T = 24 h, órbita circular y está sobre el ecuador.",
+            "La energía de amarre es el valor absoluto de la energía mecánica necesaria para escapar.",
+            "El momento angular se conserva porque la fuerza gravitatoria es central y su momento de fuerza es nulo."
+          ]
+        }
+      ]
+    },
+    {
+      "bloque": "2. Vibraciones y Ondas",
+      "descripcion": "Movimiento armónico simple, ondas mecánicas y sonoras, intensidad y fase.",
+      "detalles": [
+        {
+          "apartado": "Movimiento Armónico Simple (M.A.S.)",
+          "formulas": [
+            {
+              "nombre": "Relación entre periodo y frecuencia",
+              "latex": "f = \\frac{1}{T}",
+              "idea": "La frecuencia es el número de oscilaciones por segundo.",
+              "variables": [
+                {
+                  "simbolo": "f",
+                  "significado": "Frecuencia",
+                  "unidad": "Hz = s^{-1}"
+                },
+                {
+                  "simbolo": "T",
+                  "significado": "Periodo",
+                  "unidad": "s"
+                }
+              ],
+              "despejes": {
+                "T": "T = \\frac{1}{f}"
+              },
+              "unidades": {
+                "SI": "Hz"
+              },
+              "errores_tipicos": [
+                "Confundir frecuencia con pulsación."
+              ]
+            },
+            {
+              "nombre": "Frecuencia angular o pulsación",
+              "latex": "\\omega = 2\\pi f = \\frac{2\\pi}{T} = \\sqrt{\\frac{k}{m}}",
+              "idea": "Es la rapidez angular del movimiento oscilatorio.",
+              "variables": [
+                {
+                  "simbolo": "\\omega",
+                  "significado": "Pulsación",
+                  "unidad": "rad/s"
+                },
+                {
+                  "simbolo": "k",
+                  "significado": "Constante elástica del muelle",
+                  "unidad": "N/m"
+                },
+                {
+                  "simbolo": "m",
+                  "significado": "Masa oscilante",
+                  "unidad": "kg"
+                }
+              ],
+              "despejes": {
+                "f": "f = \\frac{\\omega}{2\\pi}",
+                "T": "T = \\frac{2\\pi}{\\omega}",
+                "k": "k = m\\omega^2",
+                "m": "m = \\frac{k}{\\omega^2}"
+              },
+              "derivacion": "Para un muelle ideal, se obtiene de F = -kx y la ecuación diferencial del MAS.",
+              "unidades": {
+                "SI": "rad/s"
+              },
+              "errores_tipicos": [
+                "No usar radianes en funciones trigonométricas.",
+                "Poner grados en lugar de radianes.",
+                "Olvidar el factor 2\\pi."
+              ]
+            },
+            {
+              "nombre": "Ecuación de elongación",
+              "latex": "x(t) = A\\cos(\\omega t + \\varphi_0)",
+              "idea": "Describe la posición instantánea de la partícula oscilante.",
+              "variables": [
+                {
+                  "simbolo": "x(t)",
+                  "significado": "Elongación",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "A",
+                  "significado": "Amplitud",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "\\varphi_0",
+                  "significado": "Fase inicial",
+                  "unidad": "rad"
+                }
+              ],
+              "despejes": {
+                "A": "A = |x|_{\\max}",
+                "\\varphi_0": "\\varphi_0 = \\arccos\\left(\\frac{x(0)}{A}\\right) \\text{ con cuidado de signo de } v(0)"
+              },
+              "relaciones": [
+                "Se puede escribir también con seno cambiando la fase inicial."
+              ],
+              "unidades": {
+                "SI": "m"
+              },
+              "errores_tipicos": [
+                "Usar la calculadora en modo grados.",
+                "Olvidar que la fase inicial depende de las condiciones iniciales."
+              ]
+            },
+            {
+              "nombre": "Velocidad en M.A.S.",
+              "latex": "v(t) = -A\\omega\\sin(\\omega t + \\varphi_0)",
+              "idea": "La velocidad es la derivada temporal de la elongación.",
+              "variables": [
+                {
+                  "simbolo": "v(t)",
+                  "significado": "Velocidad instantánea",
+                  "unidad": "m/s"
+                }
+              ],
+              "despejes": {
+                "v_{\\max}": "v_{\\max} = A\\omega",
+                "A": "A = \\frac{v_{\\max}}{\\omega}"
+              },
+              "derivacion": "Se obtiene derivando x(t) respecto del tiempo.",
+              "unidades": {
+                "SI": "m/s"
+              },
+              "relaciones": [
+                "La velocidad está adelantada \\pi/2 respecto a x."
+              ],
+              "errores_tipicos": [
+                "Olvidar el signo menos.",
+                "Pensar que la velocidad máxima ocurre en los extremos; ocurre en el equilibrio."
+              ]
+            },
+            {
+              "nombre": "Aceleración en M.A.S.",
+              "latex": "a(t) = -\\omega^2 x = -A\\omega^2\\cos(\\omega t + \\varphi_0)",
+              "idea": "La aceleración apunta siempre hacia el equilibrio.",
+              "variables": [
+                {
+                  "simbolo": "a(t)",
+                  "significado": "Aceleración instantánea",
+                  "unidad": "m/s²"
+                }
+              ],
+              "despejes": {
+                "a_{\\max}": "a_{\\max} = A\\omega^2",
+                "x": "x = -\\frac{a}{\\omega^2}"
+              },
+              "derivacion": "Se obtiene derivando la velocidad o usando F = -kx y F = ma.",
+              "unidades": {
+                "SI": "m/s²"
+              },
+              "relaciones": [
+                "La aceleración está en oposición de fase con la elongación."
+              ],
+              "errores_tipicos": [
+                "Confundir signo y módulo.",
+                "Olvidar que la aceleración máxima ocurre en los extremos."
+              ]
+            },
+            {
+              "nombre": "Energía mecánica del M.A.S.",
+              "latex": "E_m = \\frac{1}{2}kA^2 = \\frac{1}{2}m\\omega^2A^2",
+              "idea": "La energía total se conserva si no hay rozamiento.",
+              "variables": [
+                {
+                  "simbolo": "E_m",
+                  "significado": "Energía mecánica total",
+                  "unidad": "J"
+                }
+              ],
+              "despejes": {
+                "A": "A = \\sqrt{\\frac{2E_m}{k}}",
+                "k": "k = \\frac{2E_m}{A^2}",
+                "m": "m = \\frac{2E_m}{\\omega^2A^2}"
+              },
+              "relaciones": [
+                "E = E_c + E_p = \\frac{1}{2}mv^2 + \\frac{1}{2}kx^2",
+                "En x = 0, toda la energía es cinética.",
+                "En x = \\pm A, toda la energía es potencial elástica."
+              ],
+              "unidades": {
+                "SI": "J"
+              }
+            },
+            {
+              "nombre": "Relación energía-velocidad-posicion",
+              "latex": "v^2 = \\omega^2\\left(A^2 - x^2\\right)",
+              "idea": "Permite obtener la velocidad en cualquier posición del MAS.",
+              "variables": [
+                {
+                  "simbolo": "v",
+                  "significado": "Velocidad",
+                  "unidad": "m/s"
+                },
+                {
+                  "simbolo": "x",
+                  "significado": "Elongación",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "x": "x = \\pm\\sqrt{A^2 - \\frac{v^2}{\\omega^2}}"
+              },
+              "relaciones": [
+                "Se deduce combinando energía cinética y potencial."
+              ],
+              "unidades": {
+                "SI": "(m/s)^2"
+              }
+            },
+            {
+              "nombre": "Periodo de un muelle ideal",
+              "latex": "T = 2\\pi\\sqrt{\\frac{m}{k}}",
+              "idea": "Es equivalente a \\omega = \\sqrt{k/m}.",
+              "variables": [
+                {
+                  "simbolo": "m",
+                  "significado": "Masa",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "k",
+                  "significado": "Constante del muelle",
+                  "unidad": "N/m"
+                }
+              ],
+              "despejes": {
+                "m": "m = \\frac{kT^2}{4\\pi^2}",
+                "k": "k = \\frac{4\\pi^2m}{T^2}"
+              },
+              "unidades": {
+                "SI": "s"
+              }
+            },
+            {
+              "nombre": "Periodo del péndulo simple",
+              "latex": "T = 2\\pi\\sqrt{\\frac{L}{g}}",
+              "idea": "Solo es válida para oscilaciones pequeñas.",
+              "variables": [
+                {
+                  "simbolo": "L",
+                  "significado": "Longitud del péndulo",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "g",
+                  "significado": "Campo gravitatorio",
+                  "unidad": "m/s²"
+                }
+              ],
+              "despejes": {
+                "L": "L = \\frac{gT^2}{4\\pi^2}",
+                "g": "g = \\frac{4\\pi^2L}{T^2}"
+              },
+              "unidades": {
+                "SI": "s"
+              },
+              "errores_tipicos": [
+                "Usarla para amplitudes grandes sin aproximación."
+              ]
+            }
+          ],
+          "teoria_razonamiento": [
+            "f mide ciclos por segundo; \\omega mide radianes por segundo.",
+            "La velocidad va adelantada \\pi/2 respecto a la elongación.",
+            "La aceleración está desfasada \\pi respecto a la posición.",
+            "Para cálculos con MAS u ondas debe usarse la calculadora en modo radianes."
+          ]
+        },
+        {
+          "apartado": "Ondas e Intensidad",
+          "formulas": [
+            {
+              "nombre": "Ecuación de onda armónica",
+              "latex": "y(x,t) = A\\sin(\\omega t \\mp kx + \\varphi_0)",
+              "idea": "Describe una onda que se propaga en una dirección.",
+              "variables": [
+                {
+                  "simbolo": "y(x,t)",
+                  "significado": "Desplazamiento de la partícula del medio",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "A",
+                  "significado": "Amplitud",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "k",
+                  "significado": "Número de onda",
+                  "unidad": "rad/m"
+                }
+              ],
+              "despejes": {
+                "\\varphi": "\\varphi = \\omega t \\mp kx + \\varphi_0"
+              },
+              "relaciones": [
+                "Signo -: propagación hacia +x.",
+                "Signo +: propagación hacia -x."
+              ],
+              "unidades": {
+                "SI": "m"
+              },
+              "errores_tipicos": [
+                "No distinguir el signo del sentido de propagación.",
+                "Confundir el desplazamiento de la onda con la dirección de propagación."
+              ]
+            },
+            {
+              "nombre": "Número de onda",
+              "latex": "k = \\frac{2\\pi}{\\lambda}",
+              "idea": "Indica cuántos radianes de fase hay por metro.",
+              "variables": [
+                {
+                  "simbolo": "\\lambda",
+                  "significado": "Longitud de onda",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "\\lambda": "\\lambda = \\frac{2\\pi}{k}"
+              },
+              "unidades": {
+                "SI": "rad/m"
+              },
+              "errores_tipicos": [
+                "Olvidar el factor 2\\pi."
+              ]
+            },
+            {
+              "nombre": "Relación entre velocidad, longitud de onda y periodo",
+              "latex": "v_p = \\frac{\\lambda}{T} = \\lambda f = \\frac{\\omega}{k}",
+              "idea": "La velocidad de propagación depende del medio, no de la amplitud.",
+              "variables": [
+                {
+                  "simbolo": "v_p",
+                  "significado": "Velocidad de propagación",
+                  "unidad": "m/s"
+                },
+                {
+                  "simbolo": "\\lambda",
+                  "significado": "Longitud de onda",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "T",
+                  "significado": "Periodo",
+                  "unidad": "s"
+                }
+              ],
+              "despejes": {
+                "\\lambda": "\\lambda = v_p T = \\frac{v_p}{f}",
+                "T": "T = \\frac{\\lambda}{v_p}",
+                "f": "f = \\frac{v_p}{\\lambda}",
+                "\\omega": "\\omega = v_p k"
+              },
+              "relaciones": [
+                "v = \\lambda f",
+                "f = 1/T"
+              ],
+              "unidades": {
+                "SI": "m/s"
+              },
+              "errores_tipicos": [
+                "Confundir velocidad de la onda con velocidad de vibración del medio.",
+                "Suponer que la frecuencia cambia al pasar de medio."
+              ]
+            },
+            {
+              "nombre": "Diferencia de fase espacial",
+              "latex": "\\Delta\\varphi = k\\,\\Delta x",
+              "idea": "Mide el desfase entre dos puntos separados una distancia \\Delta x.",
+              "variables": [
+                {
+                  "simbolo": "\\Delta\\varphi",
+                  "significado": "Desfase",
+                  "unidad": "rad"
+                },
+                {
+                  "simbolo": "\\Delta x",
+                  "significado": "Separación espacial",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "\\Delta x": "\\Delta x = \\frac{\\Delta\\varphi}{k}",
+                "k": "k = \\frac{\\Delta\\varphi}{\\Delta x}"
+              },
+              "relaciones": [
+                "También puede escribirse \\Delta\\varphi = \\omega\\Delta t."
+              ],
+              "unidades": {
+                "SI": "rad"
+              }
+            },
+            {
+              "nombre": "Diferencia de fase temporal",
+              "latex": "\\Delta\\varphi = \\omega\\,\\Delta t",
+              "idea": "Desfase entre dos instantes en un mismo punto.",
+              "variables": [
+                {
+                  "simbolo": "\\Delta t",
+                  "significado": "Separación temporal",
+                  "unidad": "s"
+                }
+              ],
+              "despejes": {
+                "\\Delta t": "\\Delta t = \\frac{\\Delta\\varphi}{\\omega}"
+              },
+              "unidades": {
+                "SI": "rad"
+              }
+            },
+            {
+              "nombre": "Intensidad de una onda",
+              "latex": "I = \\frac{P}{S}",
+              "idea": "Energía transportada por unidad de tiempo y de superficie.",
+              "variables": [
+                {
+                  "simbolo": "I",
+                  "significado": "Intensidad",
+                  "unidad": "W/m²"
+                },
+                {
+                  "simbolo": "P",
+                  "significado": "Potencia",
+                  "unidad": "W"
+                },
+                {
+                  "simbolo": "S",
+                  "significado": "Superficie",
+                  "unidad": "m²"
+                }
+              ],
+              "despejes": {
+                "P": "P = I S",
+                "S": "S = \\frac{P}{I}"
+              },
+              "relaciones": [
+                "Para propagación esférica: S = 4\\pi r^2."
+              ],
+              "unidades": {
+                "SI": "W/m²"
+              }
+            },
+            {
+              "nombre": "Intensidad sonora a distancia r",
+              "latex": "I = \\frac{P}{4\\pi r^2}",
+              "idea": "La energía se reparte sobre la superficie de una esfera.",
+              "variables": [
+                {
+                  "simbolo": "r",
+                  "significado": "Distancia al foco",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "P": "P = 4\\pi r^2 I",
+                "r": "r = \\sqrt{\\frac{P}{4\\pi I}}"
+              },
+              "unidades": {
+                "SI": "W/m²"
+              },
+              "errores_tipicos": [
+                "Usarla cuando la propagación no es aproximadamente esférica."
+              ]
+            },
+            {
+              "nombre": "Nivel de intensidad sonora",
+              "latex": "\\beta = 10\\log_{10}\\left(\\frac{I}{I_0}\\right)",
+              "idea": "Expresa la intensidad en escala logarítmica.",
+              "variables": [
+                {
+                  "simbolo": "\\beta",
+                  "significado": "Nivel de intensidad",
+                  "unidad": "dB"
+                },
+                {
+                  "simbolo": "I_0",
+                  "significado": "Intensidad umbral",
+                  "valor_aprox": "10^{-12}",
+                  "unidad": "W/m²"
+                }
+              ],
+              "despejes": {
+                "I": "I = I_0\\,10^{\\beta/10}",
+                "I_0": "I_0 = I\\,10^{-\\beta/10}"
+              },
+              "unidades": {
+                "SI": "dB"
+              },
+              "errores_tipicos": [
+                "Usar logaritmo natural en lugar de log base 10.",
+                "Confundir intensidad con nivel de intensidad."
+              ]
+            },
+            {
+              "nombre": "Frecuencia y periodo de la onda",
+              "latex": "T = \\frac{1}{f}",
+              "idea": "Cuántos segundos tarda en completarse un ciclo.",
+              "variables": [
+                {
+                  "simbolo": "f",
+                  "significado": "Frecuencia",
+                  "unidad": "Hz"
+                }
+              ],
+              "despejes": {
+                "f": "f = \\frac{1}{T}"
+              },
+              "unidades": {
+                "SI": "s"
+              }
+            }
+          ],
+          "teoria_razonamiento": [
+            "Al cambiar de medio, la frecuencia se mantiene constante; cambian la velocidad y la longitud de onda.",
+            "Las ondas transversales vibran perpendicularmente a la propagación; las longitudinales, paralelamente.",
+            "La atenuación disminuye la intensidad por reparto geométrico; la absorción implica pérdida de energía en el medio."
+          ]
+        }
+      ]
+    },
+    {
+      "bloque": "3. Óptica Geométrica",
+      "descripcion": "Propagación rectilínea de la luz, refracción, lentes y espejos.",
+      "detalles": [
+        {
+          "apartado": "Leyes Fundamentales",
+          "formulas": [
+            {
+              "nombre": "Índice de refracción",
+              "latex": "n = \\frac{c}{v}",
+              "idea": "Mide cuánto disminuye la velocidad de la luz en un medio.",
+              "variables": [
+                {
+                  "simbolo": "c",
+                  "significado": "Velocidad de la luz en el vacío",
+                  "valor_aprox": "3\\times10^8",
+                  "unidad": "m/s"
+                },
+                {
+                  "simbolo": "v",
+                  "significado": "Velocidad de la luz en el medio",
+                  "unidad": "m/s"
+                }
+              ],
+              "despejes": {
+                "v": "v = \\frac{c}{n}",
+                "c": "c = nv"
+              },
+              "relaciones": [
+                "n suele ser mayor o igual que 1 en medios ordinarios."
+              ],
+              "unidades": {
+                "SI": "adimensional"
+              },
+              "errores_tipicos": [
+                "Pensar que n tiene unidades."
+              ]
+            },
+            {
+              "nombre": "Ley de Snell",
+              "latex": "n_1\\sin\\theta_1 = n_2\\sin\\theta_2",
+              "idea": "Relaciona los ángulos de incidencia y refracción con los índices de los medios.",
+              "variables": [
+                {
+                  "simbolo": "\\theta_1",
+                  "significado": "Ángulo de incidencia respecto a la normal",
+                  "unidad": "rad o °"
+                },
+                {
+                  "simbolo": "\\theta_2",
+                  "significado": "Ángulo de refracción respecto a la normal",
+                  "unidad": "rad o °"
+                }
+              ],
+              "despejes": {
+                "\\theta_2": "\\theta_2 = \\arcsin\\left(\\frac{n_1}{n_2}\\sin\\theta_1\\right)",
+                "n_2": "n_2 = n_1\\frac{\\sin\\theta_1}{\\sin\\theta_2}"
+              },
+              "relaciones": [
+                "Los ángulos siempre se miden respecto a la normal."
+              ],
+              "unidades": {
+                "SI": "ángulos"
+              },
+              "errores_tipicos": [
+                "Medir los ángulos respecto a la superficie en lugar de la normal."
+              ]
+            },
+            {
+              "nombre": "Ángulo límite o crítico",
+              "latex": "\\sin\\theta_L = \\frac{n_2}{n_1}",
+              "idea": "Solo existe si n_1 > n_2 y marca el inicio de la reflexión total interna.",
+              "variables": [
+                {
+                  "simbolo": "\\theta_L",
+                  "significado": "Ángulo límite",
+                  "unidad": "rad o °"
+                },
+                {
+                  "simbolo": "n_1",
+                  "significado": "Índice del medio más refringente",
+                  "unidad": "adimensional"
+                },
+                {
+                  "simbolo": "n_2",
+                  "significado": "Índice del medio menos refringente",
+                  "unidad": "adimensional"
+                }
+              ],
+              "despejes": {
+                "n_2": "n_2 = n_1\\sin\\theta_L",
+                "n_1": "n_1 = \\frac{n_2}{\\sin\\theta_L}"
+              },
+              "relaciones": [
+                "Si \\theta_1 > \\theta_L, no existe rayo refractado."
+              ],
+              "errores_tipicos": [
+                "Aplicarla cuando n_1 \\leq n_2."
+              ]
+            },
+            {
+              "nombre": "Ley de la reflexión",
+              "latex": "\\theta_i = \\theta_r",
+              "idea": "El ángulo de incidencia es igual al ángulo de reflexión.",
+              "variables": [
+                {
+                  "simbolo": "\\theta_i",
+                  "significado": "Ángulo incidente",
+                  "unidad": "rad o °"
+                },
+                {
+                  "simbolo": "\\theta_r",
+                  "significado": "Ángulo reflejado",
+                  "unidad": "rad o °"
+                }
+              ],
+              "despejes": {},
+              "unidades": {
+                "SI": "ángulos"
+              }
+            }
+          ],
+          "teoria_razonamiento": [
+            "En reflexión total interna no hay rayo refractado.",
+            "La dispersión ocurre porque el índice depende de la frecuencia.",
+            "El rayo incidente, el refractado y la normal están en un mismo plano."
+          ]
+        },
+        {
+          "apartado": "Lentes y Espejos",
+          "formulas": [
+            {
+              "nombre": "Ecuación de Gauss para lentes",
+              "latex": "\\frac{1}{s'} - \\frac{1}{s} = \\frac{1}{f'}",
+              "idea": "Relaciona la posición del objeto, la imagen y la distancia focal.",
+              "variables": [
+                {
+                  "simbolo": "s",
+                  "significado": "Posición del objeto",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "s'",
+                  "significado": "Posición de la imagen",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "f'",
+                  "significado": "Distancia focal imagen",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "s'": "s' = \\frac{1}{\\frac{1}{f'} + \\frac{1}{s}}",
+                "s": "s = \\frac{1}{\\frac{1}{s'} - \\frac{1}{f'}}",
+                "f'": "f' = \\frac{1}{\\frac{1}{s'} - \\frac{1}{s}}"
+              },
+              "relaciones": [
+                "El convenio de signos debe ser coherente en todo el problema."
+              ],
+              "errores_tipicos": [
+                "Cambiar el orden de s y s' sin adaptar signos.",
+                "Olvidar que f' debe expresarse en metros."
+              ]
+            },
+            {
+              "nombre": "Aumento lateral",
+              "latex": "A = \\frac{y'}{y} = \\frac{s'}{s}",
+              "idea": "Indica cuántas veces crece o disminuye la imagen respecto al objeto.",
+              "variables": [
+                {
+                  "simbolo": "A",
+                  "significado": "Aumento lateral",
+                  "unidad": "adimensional"
+                },
+                {
+                  "simbolo": "y",
+                  "significado": "Tamaño del objeto",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "y'",
+                  "significado": "Tamaño de la imagen",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "y'": "y' = Ay",
+                "y": "y = \\frac{y'}{A}",
+                "s'": "s' = As"
+              },
+              "relaciones": [
+                "El signo de A informa sobre la orientación de la imagen."
+              ],
+              "errores_tipicos": [
+                "Confundir aumento con tamaño absoluto."
+              ]
+            },
+            {
+              "nombre": "Potencia de una lente",
+              "latex": "P = \\frac{1}{f'}",
+              "idea": "Cuanto menor es la focal, mayor es la potencia.",
+              "variables": [
+                {
+                  "simbolo": "P",
+                  "significado": "Potencia óptica",
+                  "unidad": "dioptría = m^{-1}"
+                },
+                {
+                  "simbolo": "f'",
+                  "significado": "Distancia focal",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "f'": "f' = \\frac{1}{P}"
+              },
+              "unidades": {
+                "SI": "m^{-1}"
+              },
+              "errores_tipicos": [
+                "Dejar f' en centímetros."
+              ]
+            },
+            {
+              "nombre": "Ecuación de las lentes delgadas",
+              "latex": "\\frac{1}{f'} = \\frac{1}{s} + \\frac{1}{s'}",
+              "idea": "Forma común alternativa de la ecuación de Gauss bajo otro convenio de signos.",
+              "variables": [
+                {
+                  "simbolo": "s",
+                  "significado": "Distancia objeto",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "s'",
+                  "significado": "Distancia imagen",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "s'": "s' = \\frac{sf'}{s-f'}",
+                "s": "s = \\frac{s'f'}{s'-f'}"
+              },
+              "nota": "Usar solo si el convenio de signos del ejercicio coincide con esta expresión.",
+              "unidades": {
+                "SI": "m^{-1}"
+              }
+            },
+            {
+              "nombre": "Ecuación del fabricante de lentes",
+              "latex": "\\frac{1}{f'} = (n-1)\\left(\\frac{1}{R_1} - \\frac{1}{R_2}\\right)",
+              "idea": "Relaciona la focal con el índice de refracción y los radios de curvatura.",
+              "variables": [
+                {
+                  "simbolo": "n",
+                  "significado": "Índice de refracción del material",
+                  "unidad": "adimensional"
+                },
+                {
+                  "simbolo": "R_1",
+                  "significado": "Radio de la primera cara",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "R_2",
+                  "significado": "Radio de la segunda cara",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "f'": "f' = \\frac{1}{(n-1)(\\frac{1}{R_1} - \\frac{1}{R_2})}"
+              },
+              "unidades": {
+                "SI": "m^{-1}"
+              }
+            }
+          ],
+          "teoria_razonamiento": [
+            "Una lente convergente puede dar imagen real o virtual según la posición del objeto.",
+            "Una lente divergente forma siempre imagen virtual, derecha y menor.",
+            "La imagen real se proyecta; la virtual se obtiene prolongando rayos.",
+            "Miopía y hipermetropía se corrigen con lentes divergentes y convergentes, respectivamente."
+          ]
+        }
+      ]
+    },
+    {
+      "bloque": "4. Electromagnetismo",
+      "descripcion": "Campo eléctrico, potencial eléctrico, campo magnético e inducción electromagnética.",
+      "detalles": [
+        {
+          "apartado": "Campo Eléctrico (E)",
+          "formulas": [
+            {
+              "nombre": "Ley de Coulomb",
+              "latex": "\\vec{F} = K\\,\\frac{Qq}{r^2}\\,\\vec{u}_r",
+              "idea": "La interacción entre cargas puntuales es central y proporcional al producto de las cargas.",
+              "variables": [
+                {
+                  "simbolo": "K",
+                  "significado": "Constante electrostática",
+                  "valor_aprox": "9\\times10^9",
+                  "unidad": "N·m²/C²"
+                },
+                {
+                  "simbolo": "Q",
+                  "significado": "Carga fuente",
+                  "unidad": "C"
+                },
+                {
+                  "simbolo": "q",
+                  "significado": "Carga de prueba",
+                  "unidad": "C"
+                },
+                {
+                  "simbolo": "r",
+                  "significado": "Distancia entre cargas",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "Q": "Q = \\frac{Fr^2}{Kq}",
+                "q": "q = \\frac{Fr^2}{KQ}",
+                "r": "r = \\sqrt{\\frac{KQq}{F}}"
+              },
+              "relaciones": [
+                "K = 1/(4\\pi\\varepsilon_0)"
+              ],
+              "unidades": {
+                "SI": "N"
+              },
+              "errores_tipicos": [
+                "Olvidar el signo de las cargas.",
+                "Usar la distancia entre superficies en vez de entre centros."
+              ]
+            },
+            {
+              "nombre": "Campo eléctrico de una carga puntual",
+              "latex": "\\vec{E} = \\frac{\\vec{F}}{q} = K\\,\\frac{Q}{r^2}\\,\\vec{u}_r",
+              "idea": "Es la fuerza por unidad de carga positiva de prueba.",
+              "variables": [
+                {
+                  "simbolo": "\\vec{E}",
+                  "significado": "Campo eléctrico",
+                  "unidad": "N/C o V/m"
+                }
+              ],
+              "despejes": {
+                "Q": "Q = \\frac{Er^2}{K}",
+                "r": "r = \\sqrt{\\frac{KQ}{E}}"
+              },
+              "relaciones": [
+                "\\vec{F} = q\\vec{E}"
+              ],
+              "unidades": {
+                "SI": "N/C"
+              }
+            },
+            {
+              "nombre": "Potencial eléctrico",
+              "latex": "V = K\\,\\frac{Q}{r}",
+              "idea": "Es una magnitud escalar asociada a la energía por carga.",
+              "variables": [
+                {
+                  "simbolo": "V",
+                  "significado": "Potencial eléctrico",
+                  "unidad": "V = J/C"
+                }
+              ],
+              "despejes": {
+                "Q": "Q = \\frac{Vr}{K}",
+                "r": "r = \\frac{KQ}{V}"
+              },
+              "relaciones": [
+                "E_p = qV",
+                "\\Delta V = -\\int \\vec{E}\\cdot d\\vec{l}"
+              ],
+              "unidades": {
+                "SI": "V"
+              },
+              "errores_tipicos": [
+                "Confundir potencial con energía potencial eléctrica."
+              ]
+            },
+            {
+              "nombre": "Trabajo eléctrico",
+              "latex": "W_{A\\to B} = q(V_A - V_B)",
+              "idea": "Es el trabajo realizado por el campo eléctrico al mover una carga entre dos puntos.",
+              "variables": [
+                {
+                  "simbolo": "V_A",
+                  "significado": "Potencial en A",
+                  "unidad": "V"
+                },
+                {
+                  "simbolo": "V_B",
+                  "significado": "Potencial en B",
+                  "unidad": "V"
+                }
+              ],
+              "despejes": {
+                "V_A - V_B": "\\frac{W}{q}"
+              },
+              "relaciones": [
+                "W = -\\Delta E_p"
+              ],
+              "unidades": {
+                "SI": "J"
+              }
+            },
+            {
+              "nombre": "Energía potencial eléctrica",
+              "latex": "E_p = qV",
+              "idea": "Energía de una carga q situada en un potencial V.",
+              "variables": [
+                {
+                  "simbolo": "q",
+                  "significado": "Carga",
+                  "unidad": "C"
+                },
+                {
+                  "simbolo": "V",
+                  "significado": "Potencial",
+                  "unidad": "V"
+                }
+              ],
+              "despejes": {
+                "q": "q = \\frac{E_p}{V}",
+                "V": "V = \\frac{E_p}{q}"
+              },
+              "unidades": {
+                "SI": "J"
+              }
+            },
+            {
+              "nombre": "Teorema de Gauss",
+              "latex": "\\oint \\vec{E}\\cdot d\\vec{S} = \\frac{Q_{enc}}{\\varepsilon_0}",
+              "idea": "El flujo eléctrico total a través de una superficie cerrada depende solo de la carga encerrada.",
+              "variables": [
+                {
+                  "simbolo": "Q_{enc}",
+                  "significado": "Carga encerrada",
+                  "unidad": "C"
+                },
+                {
+                  "simbolo": "\\varepsilon_0",
+                  "significado": "Permitividad del vacío",
+                  "valor_aprox": "8.85\\times10^{-12}",
+                  "unidad": "C²/(N·m²)"
+                }
+              ],
+              "despejes": {
+                "Q_{enc}": "Q_{enc} = \\varepsilon_0\\oint \\vec{E}\\cdot d\\vec{S}"
+              },
+              "relaciones": [
+                "En simetría esférica, cilíndrica o planar se usa para hallar E con facilidad."
+              ],
+              "unidades": {
+                "SI": "N·m²/C"
+              },
+              "errores_tipicos": [
+                "Creer que sirve sin simetría cuando sí sirve, pero no siempre simplifica."
+              ]
+            }
+          ],
+          "teoria_razonamiento": [
+            "Las líneas de campo salen de cargas positivas y entran en cargas negativas.",
+            "El campo eléctrico es perpendicular a las superficies equipotenciales.",
+            "En el interior de un conductor en equilibrio electrostático el campo es cero."
+          ]
+        },
+        {
+          "apartado": "Campo Magnético (B) e Inducción",
+          "formulas": [
+            {
+              "nombre": "Fuerza de Lorentz",
+              "latex": "\\vec{F} = q(\\vec{v} \\times \\vec{B})",
+              "idea": "Una carga en movimiento en un campo magnético sufre una fuerza perpendicular a v y a B.",
+              "variables": [
+                {
+                  "simbolo": "q",
+                  "significado": "Carga",
+                  "unidad": "C"
+                },
+                {
+                  "simbolo": "\\vec{v}",
+                  "significado": "Velocidad",
+                  "unidad": "m/s"
+                },
+                {
+                  "simbolo": "\\vec{B}",
+                  "significado": "Campo magnético",
+                  "unidad": "T"
+                }
+              ],
+              "despejes": {
+                "F": "F = qvB\\sin\\theta"
+              },
+              "relaciones": [
+                "Si v es paralela a B, la fuerza es cero."
+              ],
+              "unidades": {
+                "SI": "N"
+              },
+              "errores_tipicos": [
+                "Olvidar el producto vectorial y su regla de la mano derecha."
+              ]
+            },
+            {
+              "nombre": "Radio de giro en un campo magnético uniforme",
+              "latex": "R = \\frac{mv}{qB}",
+              "idea": "Describe la trayectoria circular de una partícula cargada cuando v es perpendicular a B.",
+              "variables": [
+                {
+                  "simbolo": "m",
+                  "significado": "Masa",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "v",
+                  "significado": "Velocidad",
+                  "unidad": "m/s"
+                },
+                {
+                  "simbolo": "q",
+                  "significado": "Carga",
+                  "unidad": "C"
+                },
+                {
+                  "simbolo": "B",
+                  "significado": "Campo magnético",
+                  "unidad": "T"
+                }
+              ],
+              "despejes": {
+                "v": "v = \\frac{qBR}{m}",
+                "B": "B = \\frac{mv}{qR}"
+              },
+              "derivacion": "Se iguala qvB = mv²/R.",
+              "unidades": {
+                "SI": "m"
+              },
+              "errores_tipicos": [
+                "No distinguir radio de giro de altura o distancia lineal."
+              ]
+            },
+            {
+              "nombre": "Frecuencia ciclotrón",
+              "latex": "\\omega_c = \\frac{qB}{m}",
+              "idea": "Frecuencia angular del movimiento circular uniforme de una carga en B.",
+              "variables": [
+                {
+                  "simbolo": "\\omega_c",
+                  "significado": "Pulsación ciclotrón",
+                  "unidad": "rad/s"
+                }
+              ],
+              "despejes": {
+                "B": "B = \\frac{m\\omega_c}{q}",
+                "m": "m = \\frac{qB}{\\omega_c}"
+              },
+              "relaciones": [
+                "T = 2\\pi/\\omega_c = 2\\pi m/(qB)"
+              ],
+              "unidades": {
+                "SI": "rad/s"
+              }
+            },
+            {
+              "nombre": "Periodo ciclotrón",
+              "latex": "T = \\frac{2\\pi m}{qB}",
+              "idea": "El periodo no depende de la velocidad si la partícula es no relativista.",
+              "variables": [
+                {
+                  "simbolo": "T",
+                  "significado": "Periodo",
+                  "unidad": "s"
+                }
+              ],
+              "despejes": {
+                "B": "B = \\frac{2\\pi m}{qT}"
+              },
+              "unidades": {
+                "SI": "s"
+              }
+            },
+            {
+              "nombre": "Campo magnético de un hilo rectilíneo infinito",
+              "latex": "B = \\frac{\\mu_0 I}{2\\pi r}",
+              "idea": "El campo rodea al hilo formando circunferencias concéntricas.",
+              "variables": [
+                {
+                  "simbolo": "\\mu_0",
+                  "significado": "Permeabilidad del vacío",
+                  "valor_aprox": "4\\pi\\times10^{-7}",
+                  "unidad": "T·m/A"
+                },
+                {
+                  "simbolo": "I",
+                  "significado": "Intensidad de corriente",
+                  "unidad": "A"
+                },
+                {
+                  "simbolo": "r",
+                  "significado": "Distancia al hilo",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "I": "I = \\frac{2\\pi rB}{\\mu_0}",
+                "r": "r = \\frac{\\mu_0 I}{2\\pi B}"
+              },
+              "unidades": {
+                "SI": "T"
+              }
+            },
+            {
+              "nombre": "Campo en el centro de una espira circular",
+              "latex": "B = \\frac{\\mu_0 I}{2R}",
+              "idea": "Resultado clásico para una espira circular en su centro.",
+              "variables": [
+                {
+                  "simbolo": "R",
+                  "significado": "Radio de la espira",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "I": "I = \\frac{2RB}{\\mu_0}",
+                "R": "R = \\frac{\\mu_0 I}{2B}"
+              },
+              "unidades": {
+                "SI": "T"
+              }
+            },
+            {
+              "nombre": "Campo en un solenoide largo",
+              "latex": "B = \\mu_0 n I",
+              "idea": "Dentro de un solenoide ideal el campo es aproximadamente uniforme.",
+              "variables": [
+                {
+                  "simbolo": "n",
+                  "significado": "Número de espiras por unidad de longitud",
+                  "unidad": "m^{-1}"
+                }
+              ],
+              "despejes": {
+                "n": "n = \\frac{B}{\\mu_0 I}",
+                "I": "I = \\frac{B}{\\mu_0 n}"
+              },
+              "unidades": {
+                "SI": "T"
+              }
+            },
+            {
+              "nombre": "Flujo magnético",
+              "latex": "\\Phi_B = \\vec{B}\\cdot\\vec{S} = BS\\cos\\theta",
+              "idea": "Mide cuántas líneas de campo atraviesan una superficie.",
+              "variables": [
+                {
+                  "simbolo": "\\Phi_B",
+                  "significado": "Flujo magnético",
+                  "unidad": "Wb"
+                },
+                {
+                  "simbolo": "S",
+                  "significado": "Área",
+                  "unidad": "m²"
+                },
+                {
+                  "simbolo": "\\theta",
+                  "significado": "Ángulo entre B y la normal",
+                  "unidad": "rad o °"
+                }
+              ],
+              "despejes": {
+                "B": "B = \\frac{\\Phi_B}{S\\cos\\theta}",
+                "S": "S = \\frac{\\Phi_B}{B\\cos\\theta}"
+              },
+              "unidades": {
+                "SI": "Wb"
+              },
+              "errores_tipicos": [
+                "Usar el ángulo con la superficie en vez de con la normal."
+              ]
+            },
+            {
+              "nombre": "Ley de Faraday-Lenz",
+              "latex": "\\varepsilon = -N\\frac{d\\Phi_B}{dt}",
+              "idea": "La fem inducida se opone a la variación del flujo que la produce.",
+              "variables": [
+                {
+                  "simbolo": "\\varepsilon",
+                  "significado": "Fuerza electromotriz inducida",
+                  "unidad": "V"
+                },
+                {
+                  "simbolo": "N",
+                  "significado": "Número de espiras",
+                  "unidad": "adimensional"
+                }
+              ],
+              "despejes": {
+                "d\\Phi_B/dt": "\\frac{d\\Phi_B}{dt} = -\\frac{\\varepsilon}{N}"
+              },
+              "relaciones": [
+                "Si el circuito tiene resistencia R_c, I_ind = \\varepsilon/R_c."
+              ],
+              "unidades": {
+                "SI": "V"
+              }
+            },
+            {
+              "nombre": "Selector de velocidades",
+              "latex": "v = \\frac{E}{B}",
+              "idea": "Solo las partículas con esa velocidad pasan rectas si E y B son perpendiculares.",
+              "variables": [
+                {
+                  "simbolo": "E",
+                  "significado": "Campo eléctrico",
+                  "unidad": "V/m"
+                },
+                {
+                  "simbolo": "B",
+                  "significado": "Campo magnético",
+                  "unidad": "T"
+                }
+              ],
+              "despejes": {
+                "E": "E = vB",
+                "B": "B = \\frac{E}{v}"
+              },
+              "unidades": {
+                "SI": "m/s"
+              }
+            }
+          ],
+          "teoria_razonamiento": [
+            "La fuerza magnética no hace trabajo porque es perpendicular a la velocidad.",
+            "La ley de Lenz refleja conservación de la energía.",
+            "La corriente inducida crea un campo que se opone a la variación del flujo.",
+            "En un selector de velocidades, E y B deben ser perpendiculares."
+          ]
+        }
+      ]
+    },
+    {
+      "bloque": "5. Física Moderna",
+      "descripcion": "Cuántica y nuclear: fotones, efecto fotoeléctrico, materia ondulatoria, radiactividad y energía nuclear.",
+      "detalles": [
+        {
+          "apartado": "Física Cuántica",
+          "formulas": [
+            {
+              "nombre": "Energía de un fotón",
+              "latex": "E = hf = \\frac{hc}{\\lambda}",
+              "idea": "La energía de la radiación depende de su frecuencia.",
+              "variables": [
+                {
+                  "simbolo": "h",
+                  "significado": "Constante de Planck",
+                  "valor_aprox": "6.63\\times10^{-34}",
+                  "unidad": "J·s"
+                },
+                {
+                  "simbolo": "f",
+                  "significado": "Frecuencia",
+                  "unidad": "Hz"
+                },
+                {
+                  "simbolo": "\\lambda",
+                  "significado": "Longitud de onda",
+                  "unidad": "m"
+                }
+              ],
+              "despejes": {
+                "f": "f = \\frac{E}{h}",
+                "\\lambda": "\\lambda = \\frac{hc}{E}",
+                "E": "E = \\frac{hc}{\\lambda}"
+              },
+              "unidades": {
+                "SI": "J"
+              },
+              "errores_tipicos": [
+                "Olvidar que a mayor frecuencia, mayor energía."
+              ]
+            },
+            {
+              "nombre": "Efecto fotoeléctrico",
+              "latex": "hf = W_0 + E_{c,\\max}",
+              "idea": "La energía del fotón se reparte entre el trabajo de extracción y la energía cinética máxima del electrón.",
+              "variables": [
+                {
+                  "simbolo": "W_0",
+                  "significado": "Función trabajo o trabajo de extracción",
+                  "unidad": "J"
+                },
+                {
+                  "simbolo": "E_{c,\\max}",
+                  "significado": "Energía cinética máxima",
+                  "unidad": "J"
+                }
+              ],
+              "despejes": {
+                "E_{c,\\max}": "E_{c,\\max} = hf - W_0",
+                "W_0": "W_0 = hf - E_{c,\\max}"
+              },
+              "relaciones": [
+                "W_0 = hf_0",
+                "Si f < f_0 no hay emisión."
+              ],
+              "unidades": {
+                "SI": "J"
+              },
+              "errores_tipicos": [
+                "Pensar que subir la intensidad cambia la energía de cada electrón emitido."
+              ]
+            },
+            {
+              "nombre": "Energía cinética máxima del fotoelectrón",
+              "latex": "E_{c,\\max} = \\frac{1}{2}mv_{\\max}^2 = eV_f",
+              "idea": "La energía cinética máxima puede medirse con la tensión de frenado.",
+              "variables": [
+                {
+                  "simbolo": "m",
+                  "significado": "Masa del electrón",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "v_{\\max}",
+                  "significado": "Velocidad máxima",
+                  "unidad": "m/s"
+                },
+                {
+                  "simbolo": "e",
+                  "significado": "Carga elemental",
+                  "valor_aprox": "1.60\\times10^{-19}",
+                  "unidad": "C"
+                },
+                {
+                  "simbolo": "V_f",
+                  "significado": "Voltaje de frenado",
+                  "unidad": "V"
+                }
+              ],
+              "despejes": {
+                "v_{\\max}": "v_{\\max} = \\sqrt{\\frac{2eV_f}{m}}",
+                "V_f": "V_f = \\frac{mv_{\\max}^2}{2e}"
+              },
+              "unidades": {
+                "SI": "J"
+              },
+              "errores_tipicos": [
+                "Confundir el voltaje de frenado con el potencial de la luz."
+              ]
+            },
+            {
+              "nombre": "Frecuencia umbral",
+              "latex": "f_0 = \\frac{W_0}{h}",
+              "idea": "Frecuencia mínima necesaria para arrancar electrones.",
+              "variables": [
+                {
+                  "simbolo": "f_0",
+                  "significado": "Frecuencia umbral",
+                  "unidad": "Hz"
+                }
+              ],
+              "despejes": {
+                "W_0": "W_0 = hf_0"
+              },
+              "unidades": {
+                "SI": "Hz"
+              }
+            },
+            {
+              "nombre": "Longitud de onda de De Broglie",
+              "latex": "\\lambda = \\frac{h}{p} = \\frac{h}{mv}",
+              "idea": "Toda partícula material puede asociarse a una onda.",
+              "variables": [
+                {
+                  "simbolo": "p",
+                  "significado": "Cantidad de movimiento",
+                  "unidad": "kg·m/s"
+                }
+              ],
+              "despejes": {
+                "p": "p = \\frac{h}{\\lambda}",
+                "m": "m = \\frac{h}{\\lambda v}",
+                "v": "v = \\frac{h}{m\\lambda}"
+              },
+              "unidades": {
+                "SI": "m"
+              },
+              "errores_tipicos": [
+                "Usar mv sin revisar si la aproximación no relativista es válida."
+              ]
+            },
+            {
+              "nombre": "Principio de incertidumbre",
+              "latex": "\\Delta x\\,\\Delta p \\ge \\frac{\\hbar}{2}",
+              "idea": "No se puede conocer con precisión arbitraria posición y momento al mismo tiempo.",
+              "variables": [
+                {
+                  "simbolo": "\\Delta x",
+                  "significado": "Incertidumbre en posición",
+                  "unidad": "m"
+                },
+                {
+                  "simbolo": "\\Delta p",
+                  "significado": "Incertidumbre en momento lineal",
+                  "unidad": "kg·m/s"
+                },
+                {
+                  "simbolo": "\\hbar",
+                  "significado": "Constante reducida de Planck",
+                  "valor_aprox": "1.055\\times10^{-34}",
+                  "unidad": "J·s"
+                }
+              ],
+              "despejes": {
+                "\\Delta p": "\\Delta p \\ge \\frac{\\hbar}{2\\Delta x}",
+                "\\Delta x": "\\Delta x \\ge \\frac{\\hbar}{2\\Delta p}"
+              },
+              "unidades": {
+                "SI": "J·s"
+              }
+            }
+          ],
+          "teoria_razonamiento": [
+            "Si f es menor que la frecuencia umbral, no hay emisión fotoeléctrica aunque la intensidad sea alta.",
+            "La dualidad onda-corpúsculo aparece porque la materia y la luz muestran comportamiento ondulatorio y corpuscular.",
+            "La intensidad de la luz afecta al número de fotones, no a la energía de cada fotón."
+          ]
+        },
+        {
+          "apartado": "Física Nuclear",
+          "formulas": [
+            {
+              "nombre": "Relación masa-energía",
+              "latex": "E = \\Delta mc^2",
+              "idea": "Una variación de masa se convierte en energía y viceversa.",
+              "variables": [
+                {
+                  "simbolo": "\\Delta m",
+                  "significado": "Defecto de masa",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "c",
+                  "significado": "Velocidad de la luz",
+                  "unidad": "m/s"
+                }
+              ],
+              "despejes": {
+                "\\Delta m": "\\Delta m = \\frac{E}{c^2}"
+              },
+              "unidades": {
+                "SI": "J"
+              },
+              "errores_tipicos": [
+                "No convertir masa en kg si está en unidades atómicas."
+              ]
+            },
+            {
+              "nombre": "Defecto de masa",
+              "latex": "\\Delta m = Zm_p + Nm_n - m_{núcleo}",
+              "idea": "Masa que falta al formar el núcleo respecto a los nucleones separados.",
+              "variables": [
+                {
+                  "simbolo": "Z",
+                  "significado": "Número de protones",
+                  "unidad": "adimensional"
+                },
+                {
+                  "simbolo": "N",
+                  "significado": "Número de neutrones",
+                  "unidad": "adimensional"
+                },
+                {
+                  "simbolo": "m_p",
+                  "significado": "Masa del protón",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "m_n",
+                  "significado": "Masa del neutrón",
+                  "unidad": "kg"
+                },
+                {
+                  "simbolo": "m_{núcleo}",
+                  "significado": "Masa del núcleo",
+                  "unidad": "kg"
+                }
+              ],
+              "despejes": {
+                "m_{núcleo}": "m_{núcleo} = Zm_p + Nm_n - \\Delta m"
+              },
+              "unidades": {
+                "SI": "kg"
+              }
+            },
+            {
+              "nombre": "Energía de enlace nuclear",
+              "latex": "E_b = \\Delta mc^2",
+              "idea": "Energía necesaria para separar completamente el núcleo en nucleones.",
+              "variables": [
+                {
+                  "simbolo": "E_b",
+                  "significado": "Energía de enlace",
+                  "unidad": "J"
+                }
+              ],
+              "despejes": {
+                "\\Delta m": "\\Delta m = \\frac{E_b}{c^2}"
+              },
+              "relaciones": [
+                "La estabilidad aumenta si la energía de enlace por nucleón es mayor."
+              ],
+              "unidades": {
+                "SI": "J"
+              }
+            },
+            {
+              "nombre": "Energía de enlace por nucleón",
+              "latex": "\\frac{E_b}{A}",
+              "idea": "Sirve para comparar la estabilidad de distintos núcleos.",
+              "variables": [
+                {
+                  "simbolo": "A",
+                  "significado": "Número másico",
+                  "unidad": "adimensional"
+                }
+              ],
+              "despejes": {
+                "E_b": "E_b = A\\,\\frac{E_b}{A}"
+              },
+              "unidades": {
+                "SI": "J/nucleón"
+              }
+            },
+            {
+              "nombre": "Ley de desintegración radiactiva",
+              "latex": "N = N_0 e^{-\\lambda t}",
+              "idea": "El número de núcleos no desintegrados decrece exponencialmente.",
+              "variables": [
+                {
+                  "simbolo": "N",
+                  "significado": "Núcleos restantes",
+                  "unidad": "adimensional"
+                },
+                {
+                  "simbolo": "N_0",
+                  "significado": "Núcleos iniciales",
+                  "unidad": "adimensional"
+                },
+                {
+                  "simbolo": "\\lambda",
+                  "significado": "Constante radiactiva",
+                  "unidad": "s^{-1}"
+                }
+              ],
+              "despejes": {
+                "t": "t = -\\frac{1}{\\lambda}\\ln\\left(\\frac{N}{N_0}\\right)",
+                "\\lambda": "\\lambda = -\\frac{1}{t}\\ln\\left(\\frac{N}{N_0}\\right)"
+              },
+              "relaciones": [
+                "N = N_0/2^{t/T_{1/2}}"
+              ],
+              "unidades": {
+                "SI": "adimensional"
+              }
+            },
+            {
+              "nombre": "Actividad radiactiva",
+              "latex": "A = \\lambda N",
+              "idea": "Número de desintegraciones por unidad de tiempo.",
+              "variables": [
+                {
+                  "simbolo": "A",
+                  "significado": "Actividad",
+                  "unidad": "Bq = s^{-1}"
+                }
+              ],
+              "despejes": {
+                "N": "N = \\frac{A}{\\lambda}",
+                "\\lambda": "\\lambda = \\frac{A}{N}"
+              },
+              "relaciones": [
+                "A = -dN/dt"
+              ],
+              "unidades": {
+                "SI": "Bq"
+              }
+            },
+            {
+              "nombre": "Periodo de semidesintegración",
+              "latex": "T_{1/2} = \\frac{\\ln 2}{\\lambda}",
+              "idea": "Tiempo necesario para que se desintegre la mitad de la muestra.",
+              "variables": [
+                {
+                  "simbolo": "T_{1/2}",
+                  "significado": "Semiperiodo",
+                  "unidad": "s"
+                }
+              ],
+              "despejes": {
+                "\\lambda": "\\lambda = \\frac{\\ln 2}{T_{1/2}}"
+              },
+              "unidades": {
+                "SI": "s"
+              }
+            },
+            {
+              "nombre": "Vida media",
+              "latex": "\\tau = \\frac{1}{\\lambda}",
+              "idea": "Tiempo característico de desintegración.",
+              "variables": [
+                {
+                  "simbolo": "\\tau",
+                  "significado": "Vida media",
+                  "unidad": "s"
+                }
+              ],
+              "despejes": {
+                "\\lambda": "\\lambda = \\frac{1}{\\tau}"
+              },
+              "unidades": {
+                "SI": "s"
+              }
+            }
+          ],
+          "teoria_razonamiento": [
+            "Un núcleo es más estable cuanto mayor es su energía de enlace por nucleón.",
+            "Fusión une núcleos ligeros; fisión rompe núcleos pesados.",
+            "La actividad mide cuántas desintegraciones ocurren por segundo."
+          ]
+        }
+      ]
+    }
+  ]
+}
