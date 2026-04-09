@@ -93,6 +93,7 @@ const dashboardModal = document.getElementById("dashboard-modal");
 const importModal = document.getElementById("import-modal");
 const filePreviewModal = document.getElementById("file-preview-modal");
 const filePreviewContent = document.getElementById("file-preview-content");
+const practiceAddCard = document.getElementById("practice-add-card");
 const subjectInput = document.getElementById("subject");
 const ebauBlockInput = document.getElementById("ebauBlock");
 const ebauSubtypeInput = document.getElementById("ebauSubtype");
@@ -116,6 +117,7 @@ let historyLinkedExamName = "";
 let editingExerciseId = "";
 let editingExamId = "";
 let activePreviewObjectUrl = "";
+let pastedExerciseScreenshotFile = null;
 
 const SUBJECT_KEYWORDS = {
   Mate: [
@@ -466,6 +468,88 @@ function formatBytes(bytes) {
     unitIndex += 1;
   }
   return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function getImageFromClipboardEvent(event) {
+  const clipboardData = event?.clipboardData;
+  if (!clipboardData) {
+    return null;
+  }
+
+  const items = Array.from(clipboardData.items || []);
+  const imageItem = items.find((item) => String(item.type || "").startsWith("image/"));
+  if (imageItem) {
+    return imageItem.getAsFile();
+  }
+
+  const files = Array.from(clipboardData.files || []);
+  return files.find((file) => String(file.type || "").startsWith("image/")) || null;
+}
+
+function syncScreenshotInputWithPastedFile(file) {
+  if (!exerciseScreenshotInput || !file) {
+    return false;
+  }
+
+  try {
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    exerciseScreenshotInput.files = transfer.files;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function clearPastedExerciseScreenshot() {
+  pastedExerciseScreenshotFile = null;
+}
+
+function setPastedExerciseScreenshot(file) {
+  pastedExerciseScreenshotFile = file;
+  const attachedToInput = syncScreenshotInputWithPastedFile(file);
+
+  if (exerciseScreenshotFeedback) {
+    const fileName = file?.name || "imagen-pegada";
+    exerciseScreenshotFeedback.textContent = attachedToInput
+      ? `Imagen pegada: ${fileName}. Se guardara al enviar.`
+      : `Imagen pegada desde portapapeles (${fileName}). Se guardara al enviar.`;
+  }
+}
+
+function isPracticeCaptureAvailable() {
+  return Boolean(practiceAddCard && !practiceAddCard.classList.contains("hidden"));
+}
+
+function handleExerciseImagePaste(event) {
+  if (event.defaultPrevented || !isPracticeCaptureAvailable()) {
+    return;
+  }
+
+  const imageFile = getImageFromClipboardEvent(event);
+  if (!imageFile) {
+    return;
+  }
+
+  event.preventDefault();
+  const extension = imageFile.type.includes("png")
+    ? "png"
+    : imageFile.type.includes("jpeg")
+      ? "jpg"
+      : imageFile.type.includes("webp")
+        ? "webp"
+        : "img";
+
+  const normalizedFile = new File(
+    [imageFile],
+    imageFile.name || `captura-portapapeles-${Date.now()}.${extension}`,
+    {
+      type: imageFile.type || "image/png",
+      lastModified: Date.now(),
+    }
+  );
+
+  setPastedExerciseScreenshot(normalizedFile);
 }
 
 function openPdfRegistryDb() {
@@ -1495,6 +1579,7 @@ function setExamEditMode(isEditing) {
 function resetExerciseEditMode() {
   editingExerciseId = "";
   form.reset();
+  clearPastedExerciseScreenshot();
   if (exerciseScreenshotInput) {
     exerciseScreenshotInput.value = "";
   }
@@ -2308,7 +2393,11 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
     const formData = new FormData(form);
-    const screenshotFile = formData.get("exerciseScreenshot");
+    const screenshotFromInput = formData.get("exerciseScreenshot");
+    const screenshotFile =
+      screenshotFromInput instanceof File && screenshotFromInput.size > 0
+        ? screenshotFromInput
+        : pastedExerciseScreenshotFile;
     const hasScreenshotFile = screenshotFile instanceof File && screenshotFile.size > 0;
     let screenshotRecord = null;
 
@@ -2383,6 +2472,25 @@ form.addEventListener("submit", async (event) => {
     render();
   } catch {
     feedback.textContent = "No se pudo guardar. Recarga la pagina e intentalo de nuevo.";
+  }
+});
+
+form.addEventListener("paste", handleExerciseImagePaste);
+document.addEventListener("paste", handleExerciseImagePaste);
+
+exerciseScreenshotInput?.addEventListener("change", () => {
+  const selectedFile = exerciseScreenshotInput.files?.[0];
+  if (!selectedFile) {
+    clearPastedExerciseScreenshot();
+    if (exerciseScreenshotFeedback) {
+      exerciseScreenshotFeedback.textContent = "";
+    }
+    return;
+  }
+
+  clearPastedExerciseScreenshot();
+  if (exerciseScreenshotFeedback) {
+    exerciseScreenshotFeedback.textContent = `Imagen seleccionada: ${selectedFile.name}.`;
   }
 });
 
